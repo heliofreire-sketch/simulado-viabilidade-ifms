@@ -172,9 +172,8 @@ textarea{width:100%;min-height:160px;font:400 14px/1.4 var(--mono);background:va
         </div>
       </div>
     </div>
-    <div class="card" style="border-left:6px solid var(--amber)"><strong>VERSÃO DE TREINAMENTO — GITHUB PAGES</strong><p class="note">Este site funciona de forma independente. A classificação e o melhor resultado ficam apenas neste navegador; não são compartilhados entre estudantes. Não utilize esta versão para atribuição de notas oficiais. O gabarito está disponível no código da página.</p></div>
-    <div class="card"><div class="foot"><h2>Classificação neste navegador (treinamento)</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankIntro"></div></div>
-    <div class="card"><p class="note">Para recomeçar seus testes neste navegador:</p><button type="button" id="resetDemo" class="btn sm ghost">Limpar classificação local de treinamento</button><p class="note" id="resetDemoStatus" role="status"></p></div>
+    <div class="card" style="border-left:6px solid var(--amber)"><strong>VERSÃO DE TREINAMENTO — GITHUB PAGES</strong><p class="note">Esta versão envia resultados à Planilha Google para um ranking coletivo. Como o gabarito está disponível no HTML público, use-a somente para treinamento; não é adequada para avaliações oficiais sem um sistema de autenticação e banco de questões protegido.</p></div>
+    <div class="card"><div class="foot"><h2>Classificação coletiva — Google Sheets</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankIntro"></div></div>
     <div class="card"><details><summary>Já fez o simulado? Gerar a devolutiva em PDF a partir do código da tentativa</summary>
       <p class="note" style="margin-top:8px">O código (começa com SIM1.) aparece no final do simulado e no texto da devolutiva enviada por e-mail. Com ele, o professor gera o PDF completo daquela tentativa, na mesma ordem de questões e alternativas que o estudante viu.</p>
       <label for="codeIn">Código da tentativa<textarea id="codeIn" style="min-height:70px" placeholder="SIM1.…" spellcheck="false"></textarea></label>
@@ -202,7 +201,7 @@ textarea{width:100%;min-height:160px;font:400 14px/1.4 var(--mono);background:va
     <div class="card" id="resHead"></div>
     <div class="card"><h2>Desempenho por tema</h2><div class="bars" id="topicBars"></div></div>
     <div class="card"><h2>Tempo por questão</h2><div id="timeChart"></div><div class="chips" id="chips"></div></div>
-    <div class="card"><div class="foot"><h2>Classificação neste navegador (treinamento)</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankRes"></div><p class="note" id="rankNote"></p></div>
+    <div class="card"><div class="foot"><h2>Classificação coletiva — Google Sheets</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankRes"></div><p class="note" id="rankNote"></p></div>
     <div class="card"><h2>Enviar cópia por e-mail</h2>
       <p class="note">Nesta versão de treinamento, o e-mail automático não funciona. Use Copiar texto da devolutiva e envie manualmente, se desejar.</p>
       <div class="row"><label for="mailTo">E-mail do estudante<input id="mailTo" type="email" autocomplete="email"></label></div>
@@ -341,36 +340,34 @@ if(typeof module!=='undefined')module.exports={montarTentativa,assinaturaQ,codif
 
 </script>
 <script>
-/* Adaptador DEMONSTRATIVO GitHub Pages: armazenamento LOCAL no navegador.
-   NÃO há dados compartilhados, Google Sheets ou correção protegida no servidor. */
-(function(){
-  const STORE='quiz_viabilidade_github_rank_v1';
-  const UID='quiz_viabilidade_github_uid_v1';
-  let id;
-  try { id=localStorage.getItem(UID); if(!id){id='demo-'+(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2));localStorage.setItem(UID,id)} }
-  catch(e){id='demo-'+Math.random().toString(36).slice(2)}
-  function read(){try{const v=JSON.parse(localStorage.getItem(STORE)||'{}');return v&&typeof v==='object'?v:{}}catch(e){return {}}}
-  function write(v){try{localStorage.setItem(STORE,JSON.stringify(v))}catch(e){throw {code:'storage_unavailable'}}}
-  function snapshot(){return{docs:Object.entries(read()).map(([key,v])=>({id:key,exists:true,data:()=>v}))}}
-  let watchers=[];
-  function publish(){let s=snapshot();watchers.forEach(w=>w.ok(s))}
-  const db={collection:()=>({
-    get:async()=>snapshot(),
-    onSnapshot:(ok,er)=>{watchers.push({ok,er});ok(snapshot());return()=>{watchers=watchers.filter(w=>w.ok!==ok)}},
-    doc:key=>({
-      get:async()=>{const v=read()[key];return{exists:!!v,data:()=>v}},
-      set:async data=>{const v=read();v[key]={...data};write(v);publish()}
-    })
-  })};
-  window.claude={use:async function(name){
-    if(name==='user')return{id:()=>Promise.resolve(id)};
-    if(name==='db')return db;
-    if(name==='downloads')return null;
-    if(name==='mcp')return null;
-    return null;
-  }};
-  window.addEventListener('storage',ev=>{if(ev.key===STORE)publish()});
-})();
+/* Integração Google Sheets via Apps Script. Sem segredos ou e-mails no ranking. */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxX_WHazKScC58U1pQV8Vc58mkc3dNMr0bgiA8U9XmxRAUNUngG8I9DdmuXd727Ug3-lg/exec';
+let seqJSONP=0;
+function apiLer(parametros){
+  return new Promise((resolve,reject)=>{
+    const nome='__ifms_callback_'+(++seqJSONP);
+    const el=document.createElement('script');
+    const url=new URL(API_URL);
+    Object.entries(parametros||{}).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+    url.searchParams.set('callback',nome);
+    url.searchParams.set('_',Date.now().toString());
+    let terminou=false;
+    const limpar=()=>{delete window[nome];el.remove();clearTimeout(limite)};
+    const limite=setTimeout(()=>{if(!terminou){terminou=true;limpar();reject(new Error('Consulta sem resposta do Google.'))}},12000);
+    window[nome]=obj=>{if(!terminou){terminou=true;limpar();resolve(obj)}};
+    el.onerror=()=>{if(!terminou){terminou=true;limpar();reject(new Error('Não foi possível consultar o Google.'))}};
+    el.src=url.toString();document.head.appendChild(el);
+  });
+}
+async function apiEnviar(participacao){
+  /* no-cors não confirma sucesso: exigimos recibo consultado no servidor. */
+  await fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(participacao)});
+  for(let i=0;i<7;i++){
+    await new Promise(resolve=>setTimeout(resolve,1000+i*700));
+    try{let r=await apiLer({modo:'recibo',id:participacao.identificador});if(r.ok&&r.registrado)return true;}catch(e){}
+  }
+  return false;
+}
 
 </script>
 
@@ -514,7 +511,7 @@ function applyConfig(){
     'São '+n+', com '+LIMLBL.replace(':',' min ').replace(/ min 00$/,' min')+' por questão. É possível pular, pausando o tempo individual, e retornar depois. Quando o tempo acaba, a questão é encerrada com a alternativa marcada ou em branco.',
     'Ao final, o sistema mostra as questões pendentes e exige responder todas as que ainda tenham tempo disponível. Questões com tempo esgotado podem ficar em branco.',
     'A devolutiva, com gabarito, resolução e gráficos, aparece só ao final.',
-    'Classificação local de treinamento: maior nota. Desempate pelo menor tempo médio por questão acertada e, depois, pelo menor tempo total (questão não respondida conta '+LIMLBL+').',
+    'Classificação coletiva da planilha Google: maior nota. Desempate pelo menor tempo médio por questão acertada e, depois, pelo menor tempo total (questão não respondida conta '+LIMLBL+').',
     'Você pode refazer: na classificação vale a sua melhor tentativa (maior nota; empate pelo menor tempo). Uma tentativa pior não tira você da posição.'
   ].map(t=>'<li>'+esc(t)+'</li>').join('');
   const sg=CONFIG.siglas||[], fm=CONFIG.formulas||[];
@@ -550,26 +547,26 @@ function rankHtml(limit){
 let lastUp=null;
 const hhmm=d=>d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 async function refreshRank(btn){
-  if(!db){rankErr=rankErr||'Classificação indisponível neste acesso.';renderRank();return}
-  btn.disabled=true;
-  try{const snap=await db.collection('ranking').get();rows=normRows(snap);rankErr=null;lastUp=new Date()}
-  catch(e){rankErr='Não foi possível atualizar a classificação ('+(e&&e.code||'erro')+').'}
-  finally{btn.disabled=false;renderRank()}}
+  if(btn)btn.disabled=true;
+  try {
+    const r=await apiLer({modo:'ranking'});
+    if(!r.ok||!Array.isArray(r.ranking))throw new Error('Resposta inesperada');
+    rows=r.ranking.map((x,i)=>({id:'ranking-'+i,name:String(x.nome||''),score:Number(x.acertos)||0,avg:Number(x.media)||Infinity,tt:Number(x.tempo)||0,nota:Number(x.nota)||0}));
+    rankErr=null;lastUp=new Date();
+  } catch(e){rankErr='Classificação coletiva indisponível temporariamente. Tente atualizar.';}
+  finally {if(btn)btn.disabled=false;renderRank()}
+}
 function renderRank(){
-  document.querySelectorAll('[data-upd]').forEach(p=>p.textContent=lastUp?'Atualizado às '+hhmm(lastUp)+'. Também se atualiza sozinha quando alguém conclui.':'Atualiza sozinha quando alguém conclui; use o botão para forçar.');
+  document.querySelectorAll('[data-upd]').forEach(p=>p.textContent=lastUp?'Atualizado às '+hhmm(lastUp)+'. Atualização automática a cada 30 segundos.':'Atualize para consultar os resultados da planilha.');
   $('rankIntro').innerHTML=rankHtml(10);
   if(!$('vRes').hidden)$('rankRes').innerHTML=rankHtml(0);
   already=!!(uid&&rows&&rows.some(x=>x.id===uid));
-  $('introNote').textContent=already?'Seu melhor resultado neste navegador já está registrado; refazer só o substitui se for melhor.':'';}
+  $('introNote').textContent='Os resultados coletivos são consultados na Planilha Google; o melhor resultado por nome aparece no ranking.';}
 async function boot(){
-  rankTimer=setTimeout(()=>{if(rows===null){rankErr='A classificação não pôde ser carregada neste acesso. O simulado funciona normalmente.';renderRank()}},10000);
-  try{
-    if(!window.claude||!window.claude.use)throw 0;
-    const user=await window.claude.use('user');if(user&&user.id){uid=await user.id()}
-    db=await window.claude.use('db');
-    if(!db||!uid){rankErr='Classificação indisponível: abra o simulado conectado à sua conta Claude e com permissão de colaborador.';clearTimeout(rankTimer);renderRank();return}
-    db.collection('ranking').onSnapshot(snap=>{clearTimeout(rankTimer);rankErr=null;rows=normRows(snap);lastUp=new Date();renderRank()},e=>{clearTimeout(rankTimer);rankErr='Não foi possível ler a classificação ('+(e&&e.code||'erro')+').';renderRank()});
-  }catch(e){clearTimeout(rankTimer);rankErr='Classificação indisponível neste acesso. O simulado funciona normalmente.';renderRank()}}
+  uid='visitante';
+  await refreshRank(null);
+  setInterval(()=>{if(document.visibilityState==='visible')refreshRank(null)},30000);
+}
 
 /* ====== fluxo do simulado ====== */
 function show(v){document.body.classList.toggle('printing',v==='vPrint');['vIntro','vQuiz','vRes','vPrint'].forEach(i=>$(i).hidden=i!==v);window.scrollTo(0,0)}
@@ -676,19 +673,33 @@ function stat(i){const a=st.ans[i];return a==null?'bl':a===QS[i].ans?'ok':'no'}
 const STX={ok:'Correta',no:'Incorreta',bl:'Em branco'};
 async function finish(){
   st.done=true;
-  const score=QS.filter((_,i)=>stat(i)==='ok').length,tt=st.time.reduce((a,b)=>a+b,0),tc=st.time.reduce((a,t,i)=>a+(stat(i)==='ok'?t:0),0);
+  const score=QS.filter((_,i)=>stat(i)==='ok').length;
+  const tt=st.time.reduce((a,b)=>a+b,0);
+  const tc=st.time.reduce((a,t,i)=>a+(stat(i)==='ok'?t:0),0);
   st.res={score,tt,tc,avg:score?tc/score:null};
   show('vRes');renderRes();
-  if(db&&uid){
-    try{const ref=db.collection('ranking').doc(uid);const cur=await ref.get();
-      const nw={score,tc:Math.round(tc),tt:Math.round(tt)};
-      if(cur.exists){const o=cur.data()||{},old={score:+o.score||0,tc:+o.tc||0,tt:+o.tt||0};
-        if(melhorQue(nw,old)){await ref.set({name:st.name,...nw,at:Date.now(),v:1,n:(+o.n||1)+1});savedNow=true;$('rankNote').textContent='Novo melhor resultado! Seu resultado local foi atualizado.'}
-        else{$('rankNote').textContent='Esta tentativa não superou seu melhor resultado ('+old.score+'/'+N+'), que continua na classificação.'}}
-      else{await ref.set({name:st.name,...nw,at:Date.now(),v:1,n:1});savedNow=true;$('rankNote').textContent='Seu resultado foi registrado somente neste navegador.'}}
-    catch(e){$('rankNote').textContent='Não foi possível registrar seu resultado na classificação'+(e&&e.code==='invalid_argument'?' (é preciso ter permissão de colaborador neste simulado).':'.')}
-  }else{$('rankNote').textContent='Seu resultado não foi registrado na classificação porque ela está indisponível neste acesso.'}
-  renderRank()}
+  const id='ifms-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
+  const payload={
+    nome:st.name, identificador:id, semente:st.seed,
+    respostas:st.ans.map(x=>x||null), tempos:st.time.map(x=>Math.min(LIMIT,Math.max(0,Math.round(x*100)/100)))
+  };
+  const aviso=$('rankNote');
+  aviso.textContent='Enviando resultado à planilha Google e conferindo o recibo...';
+  try{
+    const confirmado=await apiEnviar(payload);
+    if(confirmado){
+      savedNow=true;
+      aviso.textContent='Resultado confirmado na planilha Google. Confira a classificação coletiva abaixo.';
+      await refreshRank(null);
+    } else {
+      aviso.textContent='Não foi possível confirmar o registro. Sua devolutiva continua disponível. Avise o professor.';
+      console.warn('Tentativa sem confirmação de recibo',id);
+    }
+  }catch(e){
+    aviso.textContent='Falha de comunicação com a planilha. A devolutiva continua disponível; avise o professor.';
+    console.error('Falha ao enviar à API',e);
+  }
+}
 function codigoAtual(){return codificaTentativa({seed:st.seed,sig:assinaturaQ(Q,CONFIG.embaralhar),nome:st.name,data:st.date,resp:st.ans,tempos:st.time})}
 function renderRes(){
   const r=st.res,pct=Math.round(r.score/N*100);
@@ -834,11 +845,7 @@ document.getElementById('btnShareCopy').addEventListener('click',function(){
 });
 carregarQrAlunos();
 
-document.getElementById('resetDemo').addEventListener('click', function(){
-  if(!confirm('Apagar a classificação de treinamento somente neste navegador?'))return;
-  try{localStorage.removeItem('quiz_viabilidade_github_rank_v1');document.getElementById('resetDemoStatus').textContent='Classificação local apagada. Atualize a página.';}
-  catch(e){document.getElementById('resetDemoStatus').textContent='O navegador bloqueou o armazenamento.'}
-});
+
 </script>
 
 </body>
