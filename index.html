@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulado de Viabilidade — IFMS | Treinamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Direção: caderno de prova de engenharia, papel milimetrado, tinta verde-escura, acento IFMS. */
+:root{
+  --bg:#F2F4EC;--paper:#FBFCF7;--ink:#13241D;--ink2:#46564E;--mute:#8A9A90;--line:#D5DBCB;--grid:#E4E9DB;
+  --g:#17783F;--g-soft:#DDEFE2;--amber:#B07A0C;--amber-soft:#F7E8C6;--rust:#B4471C;--rust-soft:#F6DED3;
+  --disp:'Barlow Condensed','Arial Narrow',Arial,sans-serif;--body:'Source Sans 3','Segoe UI',Arial,sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1C17;--paper:#152720;--ink:#E8EFE9;--ink2:#A3B6AB;--mute:#5F776A;--line:#2A3F35;--grid:#1A2D25;
+  --g:#5ED08A;--g-soft:#1B3A2A;--amber:#E9A93B;--amber-soft:#3A2F14;--rust:#E5835A;--rust-soft:#3D2418;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0F1C17;--paper:#152720;--ink:#E8EFE9;--ink2:#A3B6AB;--mute:#5F776A;--line:#2A3F35;--grid:#1A2D25;
+  --g:#5ED08A;--g-soft:#1B3A2A;--amber:#E9A93B;--amber-soft:#3A2F14;--rust:#E5835A;--rust-soft:#3D2418;color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font:400 18px/1.55 var(--body)}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 72px;display:flex;flex-direction:column;gap:20px}
+[hidden]{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.top b{font:700 15px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.top span{font:500 13px var(--mono);color:var(--ink2)}
+h1{font:700 clamp(40px,8vw,68px)/.95 var(--disp);text-transform:uppercase;letter-spacing:.01em;margin:0;text-wrap:balance}
+h2{font:700 30px/1 var(--disp);text-transform:uppercase;margin:0;letter-spacing:.02em}
+h3{font:600 20px/1.2 var(--body);margin:0}
+.card{background:var(--paper);border:1.5px solid var(--ink);border-radius:4px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:5px 5px 0 var(--line)}
+.lead{color:var(--ink2);margin:0;max-width:62ch}
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+label{font:600 15px var(--body);display:flex;flex-direction:column;gap:5px}
+input[type=text],input[type=email]{font:400 18px var(--body);padding:10px 12px;border:1.5px solid var(--ink);border-radius:3px;background:var(--bg);color:var(--ink);width:100%}
+input:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--g);outline-offset:2px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1 1 240px}
+.btn{font:700 17px var(--body);padding:12px 20px;border:1.5px solid var(--ink);border-radius:3px;background:var(--g);color:#fff;cursor:pointer;letter-spacing:.02em}
+:root[data-theme="dark"] .btn{color:#0F1C17}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0F1C17}}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:15px}
+.note{font-size:15px;color:var(--ink2);margin:0}
+details{border:1px solid var(--line);border-radius:3px;padding:8px 12px;background:var(--bg)}
+summary{cursor:pointer;font-weight:600}
+table.sig{border-collapse:collapse;width:100%;font-size:16px;margin-top:8px}table.sig td{border-top:1px solid var(--line);padding:5px 8px 5px 0;vertical-align:top}table.sig td:first-child{font:500 14px var(--mono);white-space:nowrap}
+.fm{font:500 15px/1.6 var(--mono);background:var(--paper);border-left:4px solid var(--g);padding:8px 12px;margin:8px 0 0}
+/* quiz */
+.qbar{display:flex;flex-direction:column;gap:10px;position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:2;border-bottom:1px solid var(--line)}
+.segs{display:grid;grid-template-columns:repeat(var(--n,15),1fr);gap:3px}.segs i{height:7px;background:var(--line);border-radius:1px}.segs i.d{background:var(--ink2)}.segs i.c{background:var(--g)}
+.tm{display:flex;align-items:center;gap:14px}
+.clock{font:500 42px/1 var(--mono);min-width:3.4ch;color:var(--ink)}
+.tbar{flex:1;height:12px;border:1.5px solid var(--ink);border-radius:2px;background:var(--paper);overflow:hidden}.tbar i{display:block;height:100%;background:var(--g);transform-origin:left}
+.tm.warn .clock{color:var(--amber)}.tm.warn .tbar i{background:var(--amber)}
+.tm.crit .clock{color:var(--rust)}.tm.crit .tbar i{background:var(--rust)}
+.tmsg{font:600 14px var(--mono);color:var(--ink2);min-width:15ch;text-align:right}
+.qh{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qn{font:700 34px/1 var(--disp);letter-spacing:.03em}
+.pill{font:600 13px var(--mono);padding:3px 9px;border:1.5px solid var(--ink);border-radius:20px;white-space:nowrap}
+.pill.ok{background:var(--g-soft);border-color:var(--g);color:var(--g)}.pill.no{background:var(--rust-soft);border-color:var(--rust);color:var(--rust)}.pill.bl{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.enun p{margin:0 0 10px}.enun p:last-child{margin:0}
+.enun sub,.enun sup,.opt sub,.opt sup,.exp sub,.exp sup{font-size:.72em;line-height:0}
+ol.rom{list-style:upper-roman;padding-left:30px;margin:0 0 10px;display:flex;flex-direction:column;gap:8px}
+ul.col2{margin:0 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:5px}
+figure{margin:0;border:1px solid var(--line);background:var(--bg);padding:10px;border-radius:3px}
+figcaption{font:500 13px var(--mono);color:var(--ink2);margin-top:4px}
+svg.fig{width:100%;height:auto;display:block}
+svg .t{font:500 11.5px var(--mono);fill:var(--ink2)}svg .tv{font:500 12.5px var(--mono);fill:var(--ink)}svg .tr{font:500 11.5px var(--mono);fill:var(--amber)}
+svg .gr{stroke:var(--line);stroke-width:1}svg .ax{stroke:var(--ink);stroke-width:1.5}svg .rf{stroke:var(--amber);stroke-width:1.8;stroke-dasharray:6 4}
+svg .pos{fill:var(--g)}svg .neg{fill:var(--rust)}svg .neu{fill:var(--mute)}svg .amb{fill:var(--amber)}
+svg .poss{stroke:var(--g);stroke-width:3}svg .negs{stroke:var(--rust);stroke-width:3}
+svg .ln{fill:none;stroke-width:2.6;stroke-linejoin:round}svg .l1{stroke:var(--g)}svg .l2{stroke:var(--amber)}svg .l3{stroke:var(--rust)}svg .dt{stroke:none}svg circle.l1{fill:var(--g)}svg circle.l2{fill:var(--amber)}
+svg .mk{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.frac{font:500 26px var(--mono);display:flex;align-items:center;justify-content:center;gap:12px;padding:8px}
+.frac .fr{display:inline-flex;flex-direction:column;align-items:center}.frac .num{border-bottom:2px solid var(--ink);padding:0 10px 2px;color:var(--g)}.frac .den{padding:2px 10px 0;color:var(--rust)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;font:400 17px/1.45 var(--body);color:var(--ink);background:var(--paper);border:1.5px solid var(--ink);border-radius:3px;padding:11px 12px;cursor:pointer;width:100%}
+.opt .k{font:700 16px var(--mono);min-width:30px;height:30px;display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:50%;flex:none}
+.opt:hover{background:var(--bg)}
+.opt[aria-checked=true]{background:var(--g-soft);border-color:var(--g);box-shadow:inset 5px 0 0 var(--g)}.opt[aria-checked=true] .k{background:var(--g);color:#fff;border-color:var(--g)}
+:root[data-theme="dark"] .opt[aria-checked=true] .k{color:#0F1C17}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+/* results */
+.score{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end}
+.big{font:700 clamp(72px,16vw,128px)/.85 var(--disp);color:var(--g)}
+.big small{font-size:.4em;color:var(--ink2)}
+.kv{display:flex;flex-direction:column;gap:0}.kv b{font:500 24px var(--mono)}.kv span{font-size:14px;color:var(--ink2)}
+.bars{display:flex;flex-direction:column;gap:8px}.bar{display:grid;grid-template-columns:130px 1fr 52px;align-items:center;gap:10px;font-size:15px}
+.bar .tr{height:14px;background:var(--line);border-radius:2px;overflow:hidden}.bar .tr i{display:block;height:100%;background:var(--g)}.bar b{font:500 14px var(--mono);text-align:right}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font:700 14px var(--mono);padding:4px 8px;border:1.5px solid var(--ink);border-radius:3px;background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none}
+.chip.ok{background:var(--g-soft);border-color:var(--g);color:var(--g)}.chip.no{background:var(--rust-soft);border-color:var(--rust);color:var(--rust)}.chip.bl{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.flt{display:flex;gap:8px;flex-wrap:wrap}.flt .btn[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.fb{display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}
+.ans{display:flex;gap:18px;flex-wrap:wrap;font:500 15px var(--mono)}
+.exp{border-left:4px solid var(--g);padding:4px 0 4px 14px;background:linear-gradient(90deg,var(--g-soft),transparent 80%)}
+.exp p{margin:0 0 8px}.exp p:last-child{margin:0}
+.opt.static{cursor:default}.opt.static.right{background:var(--g-soft);border-color:var(--g)}.opt.static.wrong{background:var(--rust-soft);border-color:var(--rust)}
+.opt.static .tag{margin-left:auto;font:700 12px var(--mono);white-space:nowrap}
+table.rk{width:100%;border-collapse:collapse;font-size:16px}table.rk th{font:600 12px var(--mono);text-transform:uppercase;text-align:left;padding:6px 8px;border-bottom:2px solid var(--ink);color:var(--ink2)}table.rk td{padding:7px 8px;border-bottom:1px solid var(--line)}
+table.rk td.n{font:700 18px var(--mono);width:44px}table.rk td.m{font:500 14px var(--mono);white-space:nowrap}table.rk tr.me td{background:var(--g-soft);font-weight:700}
+.scroll{overflow-x:auto}
+textarea{width:100%;min-height:160px;font:400 14px/1.4 var(--mono);background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:3px;padding:8px}
+.msg{font-size:15px;padding:8px 12px;border-left:4px solid var(--ink2);background:var(--bg)}.msg.ok{border-color:var(--g)}.msg.er{border-color:var(--rust)}
+@media (max-width:520px){.bar{grid-template-columns:96px 1fr 44px}.tmsg{display:none}.clock{font-size:36px}}
+@media (prefers-reduced-motion:no-preference){.tbar i{transition:transform .25s linear}}
+
+/* ---- Devolutiva em PDF (visão de impressão) ---- */
+#vPrint{--bg:#fff;--paper:#fff;--ink:#13241D;--ink2:#46564E;--mute:#6b7a71;--line:#c9d1c3;--grid:#e4e9db;--g:#17783F;--g-soft:#DDEFE2;--amber:#B07A0C;--amber-soft:#F7E8C6;--rust:#B4471C;--rust-soft:#F6DED3;color-scheme:light;background:#fff;color:#13241D;border:1.5px solid var(--ink);border-radius:4px;padding:22px 26px;box-shadow:5px 5px 0 var(--line)}
+.pv-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.pv-head h1{font:700 34px/1.1 var(--disp);margin:2px 0 0}.pv-inst{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--g)}.pv-sub{font:500 17px var(--body);color:var(--ink2);border-bottom:3px solid var(--g);padding-bottom:6px;margin-bottom:12px}
+#vPrint h2{font:700 21px var(--disp);color:var(--g);margin:20px 0 8px;letter-spacing:.02em;break-after:avoid}
+.pv-t{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 8px}.pv-t th,.pv-t td{border:1px solid var(--line);padding:4px 7px;text-align:left;vertical-align:top}.pv-t thead th{background:var(--g);color:#fff;font:600 12px var(--mono)}.pv-t tbody th{background:#f3f6ee;font:600 13px var(--body);width:1%;white-space:nowrap}.pv-t td.c{text-align:center}
+.pv-t tr.ok td:nth-child(6){color:var(--g);font-weight:700}.pv-t tr.no td:nth-child(6){color:var(--rust);font-weight:700}.pv-t tr.bl td:nth-child(6){color:var(--amber);font-weight:700}
+.pv-warn{border-left:4px solid var(--rust);background:var(--rust-soft);padding:6px 10px;font-size:14px}
+.pv-fm{font:500 14px/1.7 var(--mono);background:#f3f6ee;border-left:4px solid var(--g);padding:8px 12px;margin-top:8px}
+.pq{border-top:1.5px solid var(--ink);padding:12px 0 6px;margin-top:10px;display:flex;flex-direction:column;gap:10px}.pq-h{display:flex;gap:6px;flex-wrap:wrap;align-items:center;break-after:avoid}
+.pv-opts{display:flex;flex-direction:column;gap:5px}.pv-o{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:3px;padding:5px 9px;break-inside:avoid}.pv-o .k{font:700 14px var(--mono);min-width:1.3em}.pv-o.right{background:var(--g-soft);border-color:var(--g)}.pv-o.wrong{background:var(--rust-soft);border-color:var(--rust)}.pv-o .tag{margin-left:auto;font:700 11px var(--mono);white-space:nowrap}.pv-o sub,.pv-o sup{font-size:.72em;line-height:0}
+.pv-ans{font:500 14px var(--mono);margin:0}
+#vPrint figure{break-inside:avoid}
+.onlyscreen{display:none}body.printing .onlyscreen{display:block}
+@page{size:A4;margin:14mm 13mm}
+@media print{
+  body{background:#fff!important;background-image:none!important;font-size:12.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap>.top,.noprint,#vIntro,#vQuiz,#vRes{display:none!important}
+  body.printing .wrap{padding:0;max-width:none;display:block}
+  #vPrint{border:0;box-shadow:none;padding:0;border-radius:0}
+  .pv-break{break-before:page}.pq{break-inside:auto}
+}
+
+.segs i.p{background:var(--amber)}.segs i.e{background:var(--rust)}.chips button.chip{font:700 14px var(--mono);cursor:pointer}.chips button.chip:hover{outline:2px solid var(--g)}
+
+/* Compartilhamento do simulado por QR Code e link */
+.share-layout{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.share-layout img{border:8px solid #fff;box-shadow:0 0 0 1px var(--line);max-width:100%;height:auto}
+.share-info{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.share-info label{width:100%}.share-info input{word-break:break-all;font-size:15px}
+.share-info a{color:var(--g);overflow-wrap:anywhere}
+@media print{#shareCard{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><b id="topName">Instituição</b><span id="topinfo">Simulado</span></div>
+
+  <!-- INTRO -->
+  <section id="vIntro" class="wrap" style="padding:0">
+    <div class="card">
+      <h1 id="tTitle">Título</h1>
+      <p class="lead" id="tLead"></p>
+      <ul class="rules" id="tRules"></ul>
+      <div class="row">
+        <label for="inName">Nome para a classificação<input id="inName" type="text" maxlength="40" autocomplete="name" placeholder="Nome e sobrenome"></label>
+        <label for="inMail">E-mail para a devolutiva (opcional agora)<input id="inMail" type="email" autocomplete="email" placeholder="aluno@exemplo.com"></label>
+      </div>
+      <div class="foot"><button class="btn" id="btnStart" disabled>Iniciar simulado</button><span class="note" id="introNote"></span></div>
+      <details id="tSigBox"><summary>Siglas e fórmulas de referência</summary><div id="tSig"></div></details>
+    </div>
+    <div class="card" id="shareCard">
+      <div class="foot"><h2>Acesso por QR Code ou link</h2><button class="btn sm ghost" id="btnShareReload" type="button">Atualizar QR Code</button></div>
+      <p class="note">Projete este QR Code no data-show. Os estudantes podem ler pelo celular ou abrir o mesmo endereço pelo link.</p>
+      <div class="share-layout">
+        <img id="shareQr" width="220" height="220" alt="QR Code para abrir o simulado" hidden>
+        <div class="share-info">
+          <label for="shareLink">Link para os estudantes<input id="shareLink" type="text" readonly placeholder="Obtendo link do aplicativo..."></label>
+          <button class="btn sm" id="btnShareCopy" type="button" disabled>Copiar link</button>
+          <a id="shareOpen" target="_blank" rel="noopener noreferrer" hidden>Abrir link dos estudantes</a>
+          <p id="shareStatus" class="note" role="status">Carregando endereço...</p>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-left:6px solid var(--amber)"><strong>VERSÃO DE TREINAMENTO — GITHUB PAGES</strong><p class="note">Este site funciona de forma independente. A classificação e o melhor resultado ficam apenas neste navegador; não são compartilhados entre estudantes. Não utilize esta versão para atribuição de notas oficiais. O gabarito está disponível no código da página.</p></div>
+    <div class="card"><div class="foot"><h2>Classificação neste navegador (treinamento)</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankIntro"></div></div>
+    <div class="card"><p class="note">Para recomeçar seus testes neste navegador:</p><button type="button" id="resetDemo" class="btn sm ghost">Limpar classificação local de treinamento</button><p class="note" id="resetDemoStatus" role="status"></p></div>
+    <div class="card"><details><summary>Já fez o simulado? Gerar a devolutiva em PDF a partir do código da tentativa</summary>
+      <p class="note" style="margin-top:8px">O código (começa com SIM1.) aparece no final do simulado e no texto da devolutiva enviada por e-mail. Com ele, o professor gera o PDF completo daquela tentativa, na mesma ordem de questões e alternativas que o estudante viu.</p>
+      <label for="codeIn">Código da tentativa<textarea id="codeIn" style="min-height:70px" placeholder="SIM1.…" spellcheck="false"></textarea></label>
+      <div class="foot"><button class="btn" id="btnCode" type="button">Gerar devolutiva em PDF</button></div><div id="codeMsg" class="msg" hidden role="status"></div>
+    </details></div>
+  </section>
+
+  <!-- PDF / IMPRESSÃO -->
+  <section id="vPrint" hidden>
+    <div class="pv-ctl noprint"><button class="btn" id="btnPrint" type="button">Imprimir / salvar PDF</button><button class="btn ghost" id="btnPvHtml" type="button">Baixar arquivo para imprimir</button><button class="btn ghost" id="btnPvBack" type="button">Voltar</button><span class="note" id="pvMsg" role="status"></span></div>
+    <div id="pvBody"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="vQuiz" class="wrap" style="padding:0" hidden>
+    <div class="qbar">
+      <div class="segs" id="segs" aria-hidden="true"></div>
+      <div class="tm" id="tm"><div class="clock" id="clock" role="timer" aria-live="off">06:00</div><div class="tbar"><i id="tfill" style="transform:scaleX(1)"></i></div><div class="tmsg" id="tmsg"></div></div>
+    </div>
+    <div class="card" id="qcard"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="vRes" class="wrap" style="padding:0" hidden>
+    <div class="card" id="resHead"></div>
+    <div class="card"><h2>Desempenho por tema</h2><div class="bars" id="topicBars"></div></div>
+    <div class="card"><h2>Tempo por questão</h2><div id="timeChart"></div><div class="chips" id="chips"></div></div>
+    <div class="card"><div class="foot"><h2>Classificação neste navegador (treinamento)</h2><button class="btn sm ghost" type="button" data-refresh>Atualizar</button></div><p class="note" data-upd></p><div id="rankRes"></div><p class="note" id="rankNote"></p></div>
+    <div class="card"><h2>Enviar cópia por e-mail</h2>
+      <p class="note">Nesta versão de treinamento, o e-mail automático não funciona. Use Copiar texto da devolutiva e envie manualmente, se desejar.</p>
+      <div class="row"><label for="mailTo">E-mail do estudante<input id="mailTo" type="email" autocomplete="email"></label></div>
+      <div class="foot"><button class="btn" id="btnMail">Enviar devolutiva</button><button class="btn ghost" id="btnCopy">Copiar texto da devolutiva</button></div>
+      <div id="mailMsg" class="msg" hidden role="status"></div>
+      <details id="txtBox"><summary>Texto da devolutiva</summary><textarea id="txtArea" readonly aria-label="Texto da devolutiva"></textarea></details>
+    </div>
+    <div class="card"><h2>Devolutiva completa em PDF</h2>
+      <p class="note">Gera o PDF com resumo, gabarito, enunciados, figuras e resolução comentada, na ordem em que você respondeu. Para enviar por e-mail, anexe o arquivo salvo.</p>
+      <div class="foot"><button class="btn" id="btnPdf" type="button">Gerar PDF da devolutiva</button><button class="btn ghost" id="btnCopyCode" type="button">Copiar código da tentativa</button><span class="note" id="codeMsg2" role="status"></span></div>
+      <details><summary>Código da tentativa</summary><p class="note" style="margin-top:8px">Guarde e envie ao professor se quiser receber o PDF depois; ele reproduz esta tentativa sem você refazer o simulado.</p><textarea id="codeArea" readonly aria-label="Código da tentativa" style="min-height:90px"></textarea></details>
+    </div>
+    <div class="card"><h2>Devolutiva</h2>
+      <div class="flt" id="flt"><button class="btn sm" data-f="all" aria-pressed="true">Todas</button><button class="btn sm" data-f="no" aria-pressed="false">Erradas</button><button class="btn sm" data-f="bl" aria-pressed="false">Em branco</button></div>
+    </div>
+    <div id="fbList" class="wrap" style="padding:0;gap:16px"></div>
+    <div class="foot"><button class="btn ghost" id="btnAgain">Refazer o simulado (vale a melhor tentativa)</button></div>
+  </section>
+</div>
+
+<script>
+/* graficos.js — utilitários e ajudantes de gráfico SVG. Normalmente você NÃO precisa editar este arquivo. */
+'use strict';
+/* ====== utilitários ====== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f1=(v,d=1)=>Number(v).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmt=s=>s.replace(/\b([A-Za-z]{1,4})_([A-Za-z0-9]+)\b/g,'$1<sub>$2</sub>').replace(/\^([A-Za-z0-9]+)/g,'<sup>$1</sup>');
+const mmss=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const plain=h=>h.replace(/<sub>(.*?)<\/sub>/g,'_$1').replace(/<sup>(.*?)<\/sup>/g,'^$1').replace(/<\/p>|<\/li>/g,'\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+const LET=['A','B','C','D','E'];
+const npv=(fl,r)=>fl.reduce((a,f,t)=>a+f/Math.pow(1+r,t),0);
+const irr=fl=>{let lo=0,hi=1;for(let i=0;i<80;i++){const m=(lo+hi)/2;npv(fl,m)>0?lo=m:hi=m}return lo};
+
+/* ====== gráficos SVG ====== */
+const wrapSvg=(w,h,inner,label)=>`<svg class="fig" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${inner}</svg>`;
+function bars({items,max,unit='',ref=[],h=250,label,dec=0}){
+  const W=600,L=44,R=16,T=28,B=54,pw=W-L-R,ph=h-T-B,n=items.length,slot=pw/n,bw=Math.min(78,slot*.62);
+  const y=v=>T+ph-(v/max)*ph;let s='';
+  for(let i=0;i<=4;i++){const v=max*i/4;s+=`<line class="gr" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="t" x="${L-6}" y="${y(v)+4}" text-anchor="end">${f1(v,dec)}</text>`}
+  items.forEach((it,i)=>{const x=L+slot*i+(slot-bw)/2;
+    s+=`<rect class="${it.k||'neu'}" x="${x}" y="${y(it.v)}" width="${bw}" height="${T+ph-y(it.v)}" rx="2"/>`;
+    if(it.t!==''){s+=`<text class="tv" x="${x+bw/2}" y="${y(it.v)-6}" text-anchor="middle">${esc(it.t??f1(it.v,dec))}</text>`}
+    it.l.split('|').forEach((ln,j)=>{s+=`<text class="t" x="${x+bw/2}" y="${T+ph+16+j*14}" text-anchor="middle">${esc(ln)}</text>`})});
+  ref.forEach(r=>{s+=`<line class="rf" x1="${L}" x2="${W-R}" y1="${y(r.v)}" y2="${y(r.v)}"/><text class="tr" x="${W-R}" y="${y(r.v)-5}" text-anchor="end">${esc(r.l)}</text>`});
+  if(unit)s+=`<text class="t" x="${L}" y="14">${esc(unit)}</text>`;
+  return wrapSvg(W,h,s,label)}
+function flows({items,unit='',h=250,label}){
+  const W=600,ax=h/2+4,L=50,R=50,n=items.length,mx=Math.max(...items.map(i=>Math.abs(i.v)));
+  const x=i=>L+i*(W-L-R)/(n-1);
+  let s=`<line class="ax" x1="${L-26}" x2="${W-R+26}" y1="${ax}" y2="${ax}"/>`;
+  items.forEach((it,i)=>{const len=22+(Math.abs(it.v)/mx)*(h/2-80),up=it.v>=0,y2=up?ax-len:ax+len,k=up?'pos':'neg';
+    s+=`<line class="${k}s" x1="${x(i)}" x2="${x(i)}" y1="${ax}" y2="${y2}"/>`;
+    s+=up?`<path class="${k}" d="M${x(i)-7} ${y2+12}L${x(i)} ${y2}L${x(i)+7} ${y2+12}Z"/>`:`<path class="${k}" d="M${x(i)-7} ${y2-12}L${x(i)} ${y2}L${x(i)+7} ${y2-12}Z"/>`;
+    s+=`<text class="tv" x="${x(i)}" y="${up?y2-8:y2+19}" text-anchor="middle">${esc(it.lab??((up?'+':'−')+f1(Math.abs(it.v),0)))}</text>`;
+    s+=`<text class="t" x="${x(i)}" y="${up?ax+16:ax-8}" text-anchor="middle">t = ${i}</text>`});
+  if(unit)s+=`<text class="t" x="8" y="16">${esc(unit)}</text>`;
+  return wrapSvg(W,h,s,label)}
+function line({series,x,y,xt,yt,xl='',yl='',marks=[],h=270,label,dec=0}){
+  const W=600,L=54,R=18,T=34,B=46,pw=W-L-R,ph=h-T-B,X=v=>L+(v-x[0])/(x[1]-x[0])*pw,Y=v=>T+ph-(v-y[0])/(y[1]-y[0])*ph;let s='';
+  yt.forEach(v=>s+=`<line class="gr" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="t" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${f1(v,dec)}</text>`);
+  xt.forEach(v=>s+=`<text class="t" x="${X(v)}" y="${T+ph+16}" text-anchor="middle">${v}</text>`);
+  if(y[0]<0&&y[1]>0)s+=`<line class="ax" x1="${L}" x2="${W-R}" y1="${Y(0)}" y2="${Y(0)}"/>`;
+  series.forEach(sr=>{s+=`<polyline class="ln ${sr.k||'l1'}" ${sr.dash?'stroke-dasharray="7 5"':''} points="${sr.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`;
+    if(sr.dots)sr.pts.forEach(p=>s+=`<circle class="${sr.k||'l1'}" cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3.6"/>`)});
+  let lx=L;series.forEach(sr=>{if(sr.name){s+=`<line class="ln ${sr.k||'l1'}" ${sr.dash?'stroke-dasharray="7 5"':''} x1="${lx}" x2="${lx+26}" y1="14" y2="14"/><text class="t" x="${lx+32}" y="18">${esc(sr.name)}</text>`;lx+=sr.name.length*7.2+60}});
+  marks.forEach(m=>{s+=`<circle class="mk" cx="${X(m.x).toFixed(1)}" cy="${Y(m.y).toFixed(1)}" r="5.5"/><text class="tv" x="${X(m.x)+(m.dx??9)}" y="${Y(m.y)+(m.dy??-10)}" text-anchor="${m.a||'start'}">${esc(m.l)}</text>`});
+  if(xl)s+=`<text class="t" x="${W/2}" y="${h-6}" text-anchor="middle">${esc(xl)}</text>`;
+  if(yl)s+=`<text class="t" x="${L}" y="${T-6}">${esc(yl)}</text>`;
+  return wrapSvg(W,h,s,label)}
+function tornado({items,base,label,unit}){
+  const W=600,L=196,R=36,rh=42,T=30,h=T+items.length*rh+34;
+  const mn=Math.min(...items.map(i=>i.lo))-12,mx=Math.max(...items.map(i=>i.hi))+12,X=v=>L+(v-mn)/(mx-mn)*(W-L-R);let s='';
+  items.forEach((it,i)=>{const yy=T+i*rh;
+    s+=`<text class="t" x="${L-10}" y="${yy+rh/2+2}" text-anchor="end">${esc(it.l)}</text>`;
+    s+=`<rect class="neg" x="${X(it.lo)}" y="${yy+8}" width="${X(base)-X(it.lo)}" height="${rh-16}"/><rect class="pos" x="${X(base)}" y="${yy+8}" width="${X(it.hi)-X(base)}" height="${rh-16}"/>`;
+    s+=`<text class="tv" x="${X(it.lo)-5}" y="${yy+rh/2+4}" text-anchor="end">${it.lo}</text><text class="tv" x="${X(it.hi)+5}" y="${yy+rh/2+4}">${it.hi}</text>`});
+  s+=`<line class="ax" x1="${X(base)}" x2="${X(base)}" y1="${T-6}" y2="${T+items.length*rh+4}"/><text class="t" x="${X(base)}" y="${T+items.length*rh+20}" text-anchor="middle">VPL base = ${base}</text><text class="t" x="8" y="16">${esc(unit)}</text>`;
+  return wrapSvg(W,h,s,label)}
+const fig=(svg,cap)=>`<figure>${svg}<figcaption>${esc(cap)}</figcaption></figure>`;
+const curveFig=(fl,lab,cap,marks)=>{const pts=[];for(let i=0;i<=40;i++)pts.push([i,npv(fl,i/100)]);const r=irr(fl)*100;
+  return fig(line({series:[{pts,k:'l1'}],x:[0,40],y:[-40,70],xt:[0,10,20,30,40],yt:[-40,-20,0,20,40,60],xl:'taxa de desconto (% a.a.)',yl:'VPL (R$ mil)',marks:marks||[{x:r,y:0,l:'TIR ≈ '+f1(r)+'%',dy:-12}],label:lab}),cap)};
+
+
+</script>
+<script>
+/* embaralhar.js — embaralhamento por tentativa (determinístico a partir de uma semente).
+   Não precisa editar. Também é lido pelo gerar_devolutiva.js e pelo gerar_pdf.js. */
+'use strict';
+const LETRAS=['A','B','C','D','E'];
+function rngSeed(seed){let a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+function embaralha(arr,r){for(let i=arr.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+/* Alternativas que NÃO devem ser embaralhadas: lista padrão de asserção e razão, combinações "I e III, apenas",
+   "todas/nenhuma das anteriores", ou questão marcada com fixo:true. Use fixo:false para forçar o embaralhamento. */
+function alternativasFixas(q,AR){
+  if(q.fixo!==undefined)return !!q.fixo;
+  if(AR&&JSON.stringify(q.o)===JSON.stringify(AR))return true;
+  const plano=t=>String(t).replace(/<[^>]+>/g,'').trim();
+  if(q.o.every(t=>/^(I|II|III|IV|V)\b/.test(plano(t))||/^(Apenas|Somente|Todas|Nenhuma)\b/i.test(plano(t))))return true;
+  return q.o.some(t=>/\b(anteriores|acima|nenhuma das|todas as alternativas)\b/i.test(plano(t)));
+}
+/* Marcadores nos textos de enunciado/resolução, trocados após o embaralhamento:
+   {{B}} -> letra nova da alternativa que no cadastro é B;  {{A,C,D,E}} -> lista de letras novas, em ordem;  {{q12}} -> número novo da questão 12 do cadastro. */
+function trocaMarcadores(txt,mapaLetra,posNova){
+  if(!txt)return txt;
+  return txt.replace(/\{\{\s*q(\d+)\s*\}\}/g,(m,n)=>posNova[+n-1]!=null?String(posNova[+n-1]+1):m)
+   .replace(/\{\{\s*([A-E](?:\s*,\s*[A-E])*)\s*\}\}/g,(m,l)=>{const L=l.split(',').map(x=>mapaLetra[x.trim()]).sort();return L.length>1?L.slice(0,-1).join(', ')+' e '+L[L.length-1]:L[0]});
+}
+/* Gera a tentativa: devolve {seed, ordem (índices do cadastro na ordem apresentada), qs (questões já embaralhadas)}. */
+function montarTentativa(Q,seed,opc,AR){
+  opc=opc||{};const r=rngSeed(seed),n=Q.length;
+  const ordem=[...Array(n).keys()];if(opc.questoes!==false)embaralha(ordem,r);
+  const perm=Q.map(q=>{const p=[0,1,2,3,4].slice(0,q.o.length);if(opc.alternativas!==false&&!alternativasFixas(q,AR))embaralha(p,r);return p});
+  const posNova=[];ordem.forEach((oi,k)=>posNova[oi]=k);
+  const qs=ordem.map(oi=>{const q=Q[oi],p=perm[oi],mapa={};
+    p.forEach((orig,nov)=>mapa[LETRAS[orig]]=LETRAS[nov]);
+    return Object.assign({},q,{o:p.map(k=>q.o[k]),ans:mapa[q.ans],h:trocaMarcadores(q.h,mapa,posNova),e:trocaMarcadores(q.e,mapa,posNova),orig:oi,perm:p})});
+  return{seed,ordem,qs};
+}
+/* Assinatura simples do conteúdo (detecta se o questoes.js mudou depois da tentativa). */
+function assinaturaQ(Q,opc){let h=5381;const s=Q.map(q=>q.h+'|'+q.o.join('|')+'|'+q.ans+'|'+q.fixo).join('#')+JSON.stringify(opc||{});for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)}
+/* Código da tentativa: leva semente, respostas e tempos (não leva e-mail). */
+function codificaTentativa(d){
+  const j=JSON.stringify({v:1,s:d.seed,x:d.sig,n:d.nome||'',d:d.data||'',a:d.resp.map(x=>x||'-').join(''),t:d.tempos.map(x=>Math.round(x))});
+  const b=(typeof Buffer!=='undefined')?Buffer.from(j,'utf8').toString('base64'):btoa(unescape(encodeURIComponent(j)));
+  return 'SIM1.'+b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodificaTentativa(cod){
+  const c=String(cod||'').trim().replace(/\s+/g,'');if(!/^SIM1\./.test(c))throw new Error('Código inválido: deve começar com SIM1.');
+  let b=c.slice(5).replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';
+  let o;try{const j=(typeof Buffer!=='undefined')?Buffer.from(b,'base64').toString('utf8'):decodeURIComponent(escape(atob(b)));o=JSON.parse(j)}catch(e){throw new Error('Código inválido ou incompleto.')}
+  if(!o||o.v!==1||typeof o.s!=='number'||typeof o.a!=='string'||!Array.isArray(o.t))throw new Error('Código inválido.');
+  return{seed:o.s,sig:o.x,nome:o.n||'',data:o.d||'',resp:o.a.split('').map(x=>x==='-'?null:x),tempos:o.t};
+}
+if(typeof module!=='undefined')module.exports={montarTentativa,assinaturaQ,codificaTentativa,decodificaTentativa,alternativasFixas};
+
+</script>
+<script>
+/* Adaptador DEMONSTRATIVO GitHub Pages: armazenamento LOCAL no navegador.
+   NÃO há dados compartilhados, Google Sheets ou correção protegida no servidor. */
+(function(){
+  const STORE='quiz_viabilidade_github_rank_v1';
+  const UID='quiz_viabilidade_github_uid_v1';
+  let id;
+  try { id=localStorage.getItem(UID); if(!id){id='demo-'+(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2));localStorage.setItem(UID,id)} }
+  catch(e){id='demo-'+Math.random().toString(36).slice(2)}
+  function read(){try{const v=JSON.parse(localStorage.getItem(STORE)||'{}');return v&&typeof v==='object'?v:{}}catch(e){return {}}}
+  function write(v){try{localStorage.setItem(STORE,JSON.stringify(v))}catch(e){throw {code:'storage_unavailable'}}}
+  function snapshot(){return{docs:Object.entries(read()).map(([key,v])=>({id:key,exists:true,data:()=>v}))}}
+  let watchers=[];
+  function publish(){let s=snapshot();watchers.forEach(w=>w.ok(s))}
+  const db={collection:()=>({
+    get:async()=>snapshot(),
+    onSnapshot:(ok,er)=>{watchers.push({ok,er});ok(snapshot());return()=>{watchers=watchers.filter(w=>w.ok!==ok)}},
+    doc:key=>({
+      get:async()=>{const v=read()[key];return{exists:!!v,data:()=>v}},
+      set:async data=>{const v=read();v[key]={...data};write(v);publish()}
+    })
+  })};
+  window.claude={use:async function(name){
+    if(name==='user')return{id:()=>Promise.resolve(id)};
+    if(name==='db')return db;
+    if(name==='downloads')return null;
+    if(name==='mcp')return null;
+    return null;
+  }};
+  window.addEventListener('storage',ev=>{if(ev.key===STORE)publish()});
+})();
+
+</script>
+
+<script>
+/* =====================================================================
+   questoes.js — ESTE É O ÚNICO ARQUIVO QUE VOCÊ EDITA PARA OUTRA DISCIPLINA
+   (o gerar_devolutiva.js também lê este mesmo arquivo)
+   1) Ajuste o CONFIG.  2) Troque as questões em Q.  3) Salve e abra index.html.
+   Veja o README.md para o guia de autoria e o prompt para gerar questões com o Claude.
+   ===================================================================== */
+const CONFIG={
+  instituicao:'IFMS',                       // aparece no topo, no e-mail e no .docx
+  curso:'Administração e Economia',         // opcional ('' para omitir)
+  titulo:'Viabilidade econômico-financeira de projetos',
+  descricao:'Quinze questões de VPL, TIR, payback, IL e TMA, com enunciados completos e ênfase em interpretação.',
+  limiteSegundos:360,                       // tempo por questão (360 = 6 min)
+  embaralhar:{questoes:true,alternativas:true},  // ordem das questões e das alternativas, sorteada a cada tentativa
+  temas:['TMA e risco','VPL e fluxo','TIR','Payback','IL','Integração'],  // iguais aos "tp" das questões
+  // Quadro "Siglas e fórmulas" (opcional). Use X_y para subscrito e ^y para sobrescrito.
+  siglas:[
+    ['TMA','Taxa Mínima de Atratividade: taxa de desconto e de corte, com custo de oportunidade e risco'],
+    ['WACC','Custo médio ponderado de capital'],
+    ['VPL · TIR','Valor Presente Líquido · Taxa Interna de Retorno'],
+    ['TIRM · IL','TIR Modificada · Índice de Lucratividade'],
+    ['FC_t · I_0','Fluxo de caixa no período t · investimento inicial']
+  ],
+  formulas:[
+    'VPL = Σ FC_t / (1 + TMA)^t − I_0',
+    'TIR: Σ FC_t / (1 + TIR)^t − I_0 = 0',
+    'IL = [Σ FC_t / (1 + TMA)^t] / I_0 = 1 + VPL / I_0',
+    'WACC = w_e · k_e + w_d · k_d'
+  ]
+};
+
+/* ====== questões ====== */
+const AR=['As duas asserções são verdadeiras, e a segunda justifica a primeira.','As duas asserções são verdadeiras, mas a segunda não justifica a primeira.','A primeira asserção é verdadeira e a segunda é falsa.','A primeira asserção é falsa e a segunda é verdadeira.','As duas asserções são falsas.'];
+const S1='Múltipla escolha',S2='Assinale a INCORRETA',S3='Julgamento de afirmativas',S4='Asserção e razão',S5='Associação de colunas';
+const Q=[
+{s:S1,tp:'TMA e risco',ans:'C',
+ h:`<p>Uma indústria avalia automatizar uma linha de envase. Sua estrutura de capital é de 60% de capital próprio, com custo k_e = 16% a.a., e 40% de capital de terceiros, com custo k_d = 9% a.a., já líquido de imposto de renda. A política interna define TMA = WACC + prêmio de risco do projeto, e o comitê atribuiu a este projeto um prêmio de 2,5 p.p., por risco de obsolescência tecnológica. A TIR estimada é de 15,2% a.a. Fórmula do custo de capital: WACC = w_e · k_e + w_d · k_d, em que w_e e w_d são as proporções de capital próprio e de terceiros.</p><p><b>Assinale a alternativa que apresenta a decisão e a justificativa corretas.</b></p>`,
+ o:['Aprovar, pois a TIR (15,2% a.a.) supera o WACC, que é o custo efetivo do capital da empresa; o prêmio de risco deve ser tratado apenas na análise de sensibilidade, e não no critério de corte.','Indiferente, pois a TIR está a apenas 0,5 p.p. da TMA, diferença menor que a imprecisão típica das estimativas de fluxo de caixa, o que equivale a um VPL nulo.','Rejeitar, pois a TIR (15,2% a.a.) supera o WACC (13,2% a.a.), mas fica abaixo da TMA ajustada ao risco (15,7% a.a.), que é o limiar de decisão definido pela política da empresa.','Rejeitar, pois a TIR (15,2% a.a.) é inferior ao custo do capital próprio (16% a.a.), que deve ser adotado como TMA de qualquer projeto industrial.','Aprovar, pois a TIR supera a média simples dos custos de capital (12,5% a.a.), devendo o prêmio de risco ser somado ao VPL, em reais, ao final da análise.'],
+ fig:()=>fig(bars({items:[{l:'kd|terceiros',v:9,k:'neu'},{l:'ke|próprio',v:16,k:'neu'},{l:'TIR|do projeto',v:15.2,k:'pos'}],max:20,unit:'% a.a.',dec:0,label:'Custos de capital e TIR do projeto'}),'Dados do enunciado: custos de capital e TIR estimada (% a.a.).'),
+ e:`<p>WACC = 0,6 × 16% + 0,4 × 9% = 13,2% a.a.; TMA = 13,2% + 2,5 p.p. = 15,7% a.a. Como a TIR (15,2%) é menor que a TMA, rejeita-se.</p><p>{{A}} exclui o prêmio de risco do corte, que a política inclui. {{B}}: TIR menor que a TMA implica VPL negativo, não nulo. {{D}} chega à decisão certa com justificativa errada: a TMA é definida pela política, não pelo custo do capital próprio. {{E}} usa média simples e soma o prêmio ao VPL, o que não tem sentido.</p>`},
+{s:S1,tp:'VPL e fluxo',ans:'E',
+ h:`<p>Um retrofit de CLP exige investimento inicial I_0 = R$ 80.000 e gera fluxo de caixa líquido FC_t = R$ 30.000 ao final de cada um dos 3 anos de vida útil, com valor residual nulo. A TMA é de 10% a.a. Fórmulas: VPL = Σ FC_t/(1+TMA)^t − I_0 e IL = 1 + VPL/I_0, em que IL é o Índice de Lucratividade. Dado auxiliar: o fator de valor presente de uma anuidade de 3 períodos a 10% a.a. é 2,4869.</p><p><b>Assinale a interpretação correta do resultado.</b></p>`,
+ o:['VPL = + R$ 10.000; o projeto é viável, pois a soma nominal dos fluxos (R$ 90.000) supera o investimento e o payback simples (2,7 anos) é inferior à vida útil.','VPL ≈ + R$ 2.066 e IL ≈ 1,03; o projeto é viável, pois o valor presente dos fluxos supera ligeiramente o investimento.','VPL ≈ − R$ 5.394, mas o projeto é aceitável, pois o payback simples (2,7 anos) é inferior à vida útil de 3 anos e o fluxo nominal recupera o investimento.','VPL ≈ − R$ 5.394 e IL ≈ 0,93; o projeto é indiferente, pois o IL está próximo de 1,0 e a diferença é pequena diante da incerteza das estimativas.','VPL ≈ − R$ 5.394, IL ≈ 0,93 e TIR ≈ 6,1% a.a., abaixo da TMA; o projeto devolve nominalmente mais do que custou (R$ 90.000 contra R$ 80.000), mas rende menos que a TMA e deve ser rejeitado.'],
+ fig:()=>fig(flows({items:[{v:-80},{v:30},{v:30},{v:30}],unit:'R$ mil',label:'Diagrama de fluxo de caixa: saída de 80 e três entradas de 30'}),'Diagrama de fluxo de caixa do retrofit (R$ mil).'),
+ e:`<p>VP dos fluxos = 30.000 × 2,4869 ≈ R$ 74.606; VPL ≈ − R$ 5.394; IL ≈ 0,93. Com VPL negativo à TMA de 10%, a TIR (≈ 6,1%) é menor que 10%.</p><p>{{A}} ignora o desconto. {{B}} vem de tratar os fluxos como antecipados, contra o enunciado. {{C}} usa o payback simples, que ignora o valor do dinheiro no tempo. {{D}} confunde IL menor que 1 com indiferença, que só ocorre com IL = 1.</p>`},
+{s:S2,tp:'TIR',ans:'B',
+ h:`<p>A TIR de um projeto é a taxa i que satisfaz Σ FC_t/(1+i)^t − I_0 = 0, em que FC_t é o fluxo de caixa líquido no período t e I_0 é o investimento inicial. O VPL é calculado à TMA (Taxa Mínima de Atratividade) por VPL = Σ FC_t/(1+TMA)^t − I_0. A TIRM (TIR Modificada) reinveste os fluxos intermediários a uma taxa externa ao projeto.</p><p><b>Todas as alternativas abaixo estão corretas, EXCETO:</b></p>`,
+ o:['A TIR é determinada somente pelos fluxos de caixa do projeto; a TMA não altera seu valor e serve apenas de referência para a comparação.','Se a TIR de um projeto excede a TMA, o VPL calculado à TMA é positivo, qualquer que seja o padrão de sinais do fluxo, inclusive quando há desembolsos de desativação ao final da vida útil.','Em projetos mutuamente exclusivos, a ordenação por TIR pode divergir da ordenação por VPL quando os investimentos iniciais ou os perfis temporais dos fluxos diferem.','A TIR pressupõe que os fluxos intermediários sejam reinvestidos à própria TIR, premissa que a TIRM substitui por uma taxa de reinvestimento externa ao projeto.','Fluxos com mais de uma inversão de sinal podem apresentar mais de uma taxa real que anula o VPL, o que torna a TIR ambígua nesses casos.'],
+ fig:()=>curveFig([-100,40,40,40,40],'VPL em função da taxa de desconto para um fluxo convencional','Ilustração: VPL × taxa de desconto de um fluxo convencional (−100, depois +40 por 4 anos).'),
+ e:`<p>É a falsa: com mais de uma inversão de sinal, TIR maior que a TMA não garante VPL positivo (na questão {{q12}} o VPL é negativo fora do intervalo entre as raízes). {{A,C,D,E}} são enunciados corretos sobre a TIR.</p>`},
+{s:S3,tp:'Payback',ans:'D',
+ h:`<p>O payback simples é o primeiro instante em que a soma dos fluxos FC_t iguala o investimento inicial I_0. O payback descontado é o primeiro instante em que a soma de FC_t/(1+TMA)^t iguala I_0, em que TMA é a Taxa Mínima de Atratividade, aqui sempre maior que zero. O VPL é dado por Σ FC_t/(1+TMA)^t − I_0. Julgue as afirmativas.</p>
+ <ol class="rom"><li>Se todos os fluxos posteriores ao investimento forem positivos, o payback descontado é maior ou igual ao payback simples.</li><li>Se o payback descontado ocorre antes do fim da vida útil, o VPL é necessariamente positivo, qualquer que seja o fluxo posterior à recuperação.</li><li>Um projeto pode ter payback simples curto e VPL negativo, se houver desembolsos relevantes após a recuperação, pois o payback ignora esses fluxos.</li><li>Entre dois projetos, o de menor payback descontado é o que gera o maior VPL.</li></ol><p><b>Estão corretas:</b></p>`,
+ o:['I e II apenas.','II e III apenas.','I, II e IV apenas.','I e III apenas.','II, III e IV apenas.'],
+ e:`<p>I é verdadeira: o desconto só alonga o prazo. II é falsa: desembolsos posteriores à recuperação podem tornar o VPL negativo. III é verdadeira, pelo mesmo motivo. IV é falsa: o payback ignora fluxos posteriores e a escala do projeto.</p>`,
+ efig:()=>{const fl=[-100,60,60,60,-90],r=.10;const sim=[],des=[];let a=0,b=0;fl.forEach((f,t)=>{a+=f;b+=f/Math.pow(1+r,t);sim.push([t,a]);des.push([t,b])});
+  return fig(line({series:[{pts:sim,k:'l2',name:'acumulado simples',dots:1},{pts:des,k:'l1',name:'acumulado descontado (10%)',dots:1}],x:[0,4],y:[-120,100],xt:[0,1,2,3,4],yt:[-100,-50,0,50,100],xl:'ano',yl:'R$ mil',label:'Fluxo acumulado com desembolso de desativação no ano 4'}),'Exemplo: −100, +60, +60, +60 e −90 de desativação no ano 4. Os dois paybacks ocorrem cedo, mas o VPL final é negativo (≈ −12).')}},
+{s:S4,tp:'TIR',ans:'A',
+ h:`<p>Considere a TIR, taxa que anula o VPL (Σ FC_t/(1+TIR)^t − I_0 = 0), e a TMA (Taxa Mínima de Atratividade) de 12% a.a., com VPL = Σ FC_t/(1+TMA)^t − I_0.</p><p><b>Asserção:</b> entre dois projetos mutuamente exclusivos, X com TIR de 40% a.a. e Y com TIR de 18% a.a., ambos acima da TMA, o projeto Y pode ser a melhor escolha, <b>PORQUE</b> a TIR é uma medida percentual que não incorpora a escala do investimento nem o ganho absoluto de riqueza em reais.</p><p><b>Assinale a alternativa correta.</b></p>`,
+ o:AR,
+ fig:()=>fig(bars({items:[{l:'TIR de X',v:40,k:'pos'},{l:'TIR de Y',v:18,k:'pos'}],max:50,unit:'% a.a.',ref:[{v:12,l:'TMA = 12%'}],label:'TIR de X e de Y acima da TMA'}),'Dados do enunciado: TIR dos projetos mutuamente exclusivos X e Y.'),
+ e:`<p>As duas são verdadeiras e a razão explica a asserção: um projeto pequeno com TIR alta pode gerar menos VPL que um grande com TIR menor, ambos acima da TMA.</p>`},
+{s:S1,tp:'IL',ans:'A',
+ h:`<p>Um projeto de sensorização IoT exige investimento inicial I_0 = R$ 250.000. À TMA (Taxa Mínima de Atratividade) de 12% a.a., a soma dos valores presentes dos fluxos futuros, Σ FC_t/(1+TMA)^t, é de R$ 287.500. Fórmulas: VPL = Σ FC_t/(1+TMA)^t − I_0 e IL = [Σ FC_t/(1+TMA)^t] / I_0 = 1 + VPL/I_0, em que IL é o Índice de Lucratividade.</p><p><b>Assinale a leitura correta do resultado.</b></p>`,
+ o:['VPL = R$ 37.500 e IL = 1,15: cada R$ 1,00 investido retorna R$ 1,15 em valor presente, isto é, R$ 0,15 de riqueza líquida por real investido, já descontada a remuneração à TMA.','O IL de 1,15 indica retorno de 15% a.a., superior à TMA de 12% a.a., o que equivale a dizer que a TIR do projeto é de 15% a.a.','VPL = R$ 287.500 e IL = 1,15; o projeto é viável porque o valor presente dos fluxos futuros é positivo.','O IL de 1,15 garante que o projeto supera qualquer alternativa com IL de 1,10, mesmo que esta tenha VPL maior, independentemente de haver ou não restrição orçamentária.','Como o IL é maior que 1, a TIR do projeto é necessariamente superior a 15% a.a., pois o IL é a própria TIR expressa em forma de razão.'],
+ fig:()=>fig(bars({items:[{l:'I0|investimento',v:250,k:'neu'},{l:'Σ valores presentes|dos fluxos',v:287.5,k:'pos'}],max:300,unit:'R$ mil',dec:0,label:'Investimento inicial e soma dos valores presentes'}),'Dados do enunciado (R$ mil, à TMA de 12% a.a.).'),
+ e:`<p>VPL = 287.500 − 250.000 = R$ 37.500; IL = 287.500 / 250.000 = 1,15. {{B}} trata o IL como taxa, o que ele não é. {{C}} esquece de subtrair I_0. {{D}} generaliza o ranking por IL, que só é apropriado sob restrição orçamentária. {{E}} atribui ao IL um poder sobre a TIR que ele não tem: IL maior que 1 garante apenas TIR maior que a TMA.</p>`},
+{s:S1,tp:'Payback',ans:'B',
+ h:`<p>Um projeto de veículo guiado automático (AGV) exige I_0 = R$ 300.000 e gera FC_t = R$ 120.000 ao final de cada um dos 4 anos de vida útil. A TMA é de 15% a.a. A política de liquidez da empresa exige payback descontado máximo de 3 anos. Fórmulas: VPL = Σ FC_t/(1+TMA)^t − I_0; payback descontado = menor prazo T tal que Σ(t=1 a T) FC_t/(1+TMA)^t ≥ I_0, com interpolação linear dentro do ano. Dado auxiliar: os valores presentes dos fluxos dos anos 1 a 4 são R$ 104.348, R$ 90.737, R$ 78.902 e R$ 68.610.</p><p><b>Assinale a alternativa correta.</b></p>`,
+ o:['Como os fluxos são constantes, o payback descontado coincide com o simples (2,5 anos) e o projeto atende à política de liquidez.','O payback simples é de 2,5 anos, o descontado é de cerca de 3,4 anos e o VPL é de aproximadamente + R$ 42.597: o projeto cria valor, mas viola a política de liquidez, cabendo à gestão decidir se o prazo é restrição inegociável ou critério flexível.','O payback descontado é de cerca de 3,4 anos e o VPL é positivo; como o VPL é o critério de riqueza, a política de liquidez é irrelevante e deve ser desconsiderada.','O payback descontado é de cerca de 3,4 anos; como excede 3 anos, o VPL é necessariamente negativo e o projeto deve ser rejeitado.','O payback descontado é de cerca de 3,4 anos; por incorporar o custo de oportunidade do capital, ele prevalece sobre o VPL em qualquer circunstância, inclusive quando há fluxos relevantes após a recuperação.'],
+ fig:()=>fig(bars({items:[1,2,3,4].map((a,i)=>({l:'ano '+a,v:[104.348,90.737,78.902,68.610][i],k:'pos'})),max:120,unit:'valor presente do fluxo (R$ mil)',dec:0,label:'Valor presente de cada fluxo anual'}),'Dados do enunciado: valor presente do fluxo de cada ano (R$ mil, TMA de 15% a.a.).'),
+ e:`<p>VP acumulado: 104.348; 195.085; 273.987; 342.597. Payback descontado = 3 + (300.000 − 273.987)/68.610 ≈ 3,4 anos; VPL ≈ R$ 42.597; payback simples = 300.000/120.000 = 2,5 anos.</p><p>{{A}} erra: o desconto alonga o prazo. {{C}} descarta uma restrição legítima de liquidez. {{D}} confunde prazo longo com VPL negativo. {{E}} dá ao payback uma primazia que ele não tem, pois ignora os fluxos após a recuperação.</p>`,
+ efig:()=>{const pv=[104.348,90.737,78.902,68.610];let c=-300;const pts=[[0,-300]];pv.forEach((p,i)=>{c+=p;pts.push([i+1,c])});
+  return fig(line({series:[{pts,k:'l1',dots:1,name:'acumulado descontado (15%)'}],x:[0,4],y:[-320,80],xt:[0,1,2,3,4],yt:[-300,-200,-100,0],xl:'ano',yl:'R$ mil',marks:[{x:3.38,y:0,l:'≈ 3,4 anos',dx:-10,a:'end',dy:-12}],label:'Fluxo acumulado descontado cruzando zero em 3,4 anos'}),'Fluxo acumulado descontado: cruza zero em ≈ 3,4 anos, depois da meta de 3, e termina em +42,6.')}},
+{s:S4,tp:'IL',ans:'D',
+ h:`<p>Considere o VPL = Σ FC_t/(1+TMA)^t − I_0 e o IL (Índice de Lucratividade) = [Σ FC_t/(1+TMA)^t] / I_0 = 1 + VPL/I_0, em que TMA é a Taxa Mínima de Atratividade, FC_t é o fluxo de caixa no período t e I_0 é o investimento inicial.</p><p><b>Asserção:</b> dois projetos com o mesmo VPL têm, necessariamente, o mesmo IL, <b>PORQUE</b> o IL é função do VPL e também do investimento inicial, pela expressão 1 + VPL/I_0.</p><p><b>Assinale a alternativa correta.</b></p>`,
+ o:AR,
+ fig:()=>`<figure><div class="frac" aria-label="IL = 1 + VPL dividido por I zero"><span>IL</span><span>=</span><span>1 +</span><span class="fr"><span class="num">VPL</span><span class="den">I<sub>0</sub></span></span></div><figcaption>Estrutura do IL: o numerador depende do VPL; o denominador, do investimento inicial.</figcaption></figure>`,
+ e:`<p>A asserção é falsa: com o mesmo VPL e I_0 diferentes, o IL = 1 + VPL/I_0 muda (VPL de R$ 30.000 dá IL de 1,30 sobre R$ 100.000 e de 1,075 sobre R$ 400.000). A razão é verdadeira.</p>`},
+{s:S5,tp:'Integração',ans:'C',
+ h:`<p>Seja VPL = Σ FC_t/(1+TMA)^t − I_0 e IL = [Σ FC_t/(1+TMA)^t] / I_0, em que FC_t é o fluxo de caixa no período t e I_0 é o investimento inicial. Relacione cada indicador da Coluna I à leitura correspondente da Coluna II.</p><p><b>Coluna I:</b> (1) VPL · (2) TIR · (3) Payback descontado · (4) IL · (5) TMA.</p><p><b>Coluna II:</b></p><ul class="col2"><li><b>(a)</b> Razão entre o valor presente dos fluxos futuros e o investimento inicial: quanto vale, hoje, cada R$ 1,00 aplicado.</li><li><b>(b)</b> Taxa de desconto que anula a diferença entre o valor presente dos fluxos e o investimento; independe da taxa de corte adotada.</li><li><b>(c)</b> Prazo em que os fluxos, já trazidos a valor presente, repõem o capital aplicado.</li><li><b>(d)</b> Diferença, em reais na data zero, entre o valor presente dos fluxos e o investimento inicial.</li><li><b>(e)</b> Taxa usada para descontar os fluxos e como limiar de decisão, composta por custo de oportunidade e risco.</li></ul><p><b>A associação correta é:</b></p>`,
+ o:['1-a, 2-b, 3-c, 4-d, 5-e.','1-d, 2-e, 3-c, 4-a, 5-b.','1-d, 2-b, 3-c, 4-a, 5-e.','1-d, 2-b, 3-a, 4-c, 5-e.','1-e, 2-b, 3-c, 4-a, 5-d.'],
+ fig:()=>fig(flows({items:[{v:-1,lab:'I0'},{v:1,lab:'FC1'},{v:1,lab:'FC2'},{v:1,lab:'FC3'},{v:1,lab:'FC4'}],label:'Linha do tempo com investimento inicial e fluxos futuros'}),'Linha do tempo genérica: investimento em t = 0 e fluxos futuros descontados pela taxa de corte.'),
+ e:`<p>1-d (VPL em reais), 2-b (TIR anula o VPL e independe da TMA), 3-c (payback descontado), 4-a (IL), 5-e (TMA). As demais alternativas trocam leituras próximas, como TIR com TMA ou VPL com IL.</p>`},
+{s:S3,tp:'IL',ans:'E',
+ h:`<p>A TMA é de 12% a.a. Dois projetos independentes e indivisíveis (cada um é executado por inteiro ou não é executado) têm os seguintes dados: P1, com I_0 = R$ 100.000 e VPL = R$ 30.000; P2, com I_0 = R$ 400.000 e VPL = R$ 80.000. Fórmulas: VPL = Σ FC_t/(1+TMA)^t − I_0 e IL = 1 + VPL/I_0.</p>
+ <ol class="rom"><li>Isoladamente, os dois projetos são viáveis, com IL de 1,30 para P1 e 1,20 para P2.</li><li>Se P1 e P2 fossem mutuamente exclusivos e não houvesse restrição de capital, P1 deveria ser escolhido por ter o maior IL.</li><li>Com orçamento de R$ 500.000, a carteira P1 + P2 gera VPL total de R$ 110.000.</li><li>Com orçamento de R$ 450.000, ranquear pelo IL levaria a executar apenas P1 (VPL de R$ 30.000), solução inferior a executar apenas P2 (VPL de R$ 80.000).</li></ol><p><b>Estão corretas:</b></p>`,
+ o:['I e II apenas.','I, II e IV apenas.','II, III e IV apenas.','I e III apenas.','I, III e IV apenas.'],
+ fig:()=>fig(bars({items:[{l:'P1|I_0',v:100,k:'neu'},{l:'P1|VPL',v:30,k:'pos'},{l:'P2|I_0',v:400,k:'neu'},{l:'P2|VPL',v:80,k:'pos'}].map(i=>({...i,l:i.l.replace('_','')})),max:400,unit:'R$ mil',label:'Investimento e VPL de P1 e P2'}),'Dados do enunciado: investimento inicial e VPL de cada projeto (R$ mil).'),
+ e:`<p>IL de P1 = 1 + 30/100 = 1,30; de P2 = 1 + 80/400 = 1,20 (I). II é falsa: sem restrição de capital e com projetos excludentes, vale o maior VPL, ou seja, P2. III é verdadeira: 30.000 + 80.000 = 110.000. IV é verdadeira: o IL escolhe P1 e sobram R$ 350.000, insuficientes para P2.</p>`},
+{s:S2,tp:'TMA e risco',ans:'C',
+ h:`<p>Na análise de sensibilidade de um projeto de automação, recalcula-se o VPL = Σ FC_t/(1+TMA)^t − I_0 variando premissas como tarifa de energia, custo de manutenção preventiva e demanda. Aqui, VPL é o Valor Presente Líquido, FC_t é o fluxo de caixa no período t, I_0 é o investimento inicial e TMA é a Taxa Mínima de Atratividade, composta por custo de capital e prêmio de risco.</p><p><b>Todas as alternativas abaixo estão corretas, EXCETO:</b></p>`,
+ o:['Variar uma premissa por vez e recalcular o VPL permite identificar quais variáveis mais afetam a viabilidade do projeto.','O valor de uma variável que zera o VPL (por exemplo, a demanda mínima) é um limite de viabilidade e mede a margem de erro tolerada pela estimativa.','Se o VPL permanece positivo em todos os cenários testados, a TMA pode ser reduzida sem alterar a decisão, o que dispensa o prêmio de risco de sua composição.','Calcular o VPL para diversas TMA mostra a taxa em que a decisão se inverte, que, em fluxos convencionais, coincide com a TIR do projeto.','Cenários combinados (pessimista, esperado e otimista) captam efeitos simultâneos de variáveis correlacionadas, que a variação de uma única premissa isolada não capta.'],
+ fig:()=>fig(tornado({items:[{l:'Demanda ± 20%',lo:20,hi:180},{l:'Tarifa de energia ± 20%',lo:55,hi:145},{l:'Manutenção ± 20%',lo:70,hi:130},{l:'TMA ± 2 p.p.',lo:80,hi:122}],base:100,unit:'VPL (R$ mil)',label:'Gráfico de tornado de sensibilidade do VPL'}),'Ilustração hipotética de um gráfico de tornado: cada barra mostra o VPL no pior e no melhor caso de uma variável.'),
+ e:`<p>É a falsa: o prêmio de risco cobre incertezas que os cenários testados não esgotam, e reduzir a TMA porque o VPL resistiu a alguns cenários distorce o critério de corte. As demais descrevem usos corretos da análise.</p>`},
+{s:S1,tp:'TIR',ans:'E',
+ h:`<p>Um retrofit de linha exige I_0 = R$ 100.000 e gera FC_1 = + R$ 230.000 ao final do ano 1. Ao final do ano 2, a reposição de equipamentos gera FC_2 = − R$ 132.000. A TMA é de 12% a.a. Fórmula: VPL(i) = −I_0 + FC_1/(1+i) + FC_2/(1+i)^2. Sabe-se que as taxas i que anulam o VPL são 10% a.a. e 20% a.a.</p><p><b>Assinale a interpretação correta.</b></p>`,
+ o:['Como a menor TIR (10% a.a.) é inferior à TMA (12% a.a.), o projeto é inviável.','Como a maior TIR (20% a.a.) supera a TMA, o projeto é viável, e seu VPL aumenta continuamente à medida que a taxa de desconto cresce até 20% a.a.','As duas TIRs têm média de 15% a.a., superior à TMA; logo o projeto é viável com folga de 3 p.p., critério que dispensa o cálculo do VPL.','A existência de duas TIRs invalida o cálculo do VPL, que fica indeterminado quando o fluxo tem mais de uma inversão de sinal.','O fluxo tem duas inversões de sinal e, por isso, duas TIRs (10% e 20% a.a.); como a TMA de 12% a.a. está entre elas, o VPL é positivo (cerca de R$ 128), e a decisão deve apoiar-se no VPL, não na comparação da TIR com a TMA.'],
+ fig:()=>fig(flows({items:[{v:-100},{v:230},{v:-132}],unit:'R$ mil',label:'Diagrama de fluxo de caixa: saída de 100, entrada de 230 e saída de 132'}),'Diagrama de fluxo de caixa do retrofit (R$ mil): duas inversões de sinal.'),
+ e:`<p>VPL(12%) = −100.000 + 230.000/1,12 − 132.000/1,12² ≈ + R$ 128. O fluxo tem duas inversões de sinal e duas raízes (10% e 20%); o VPL é positivo entre elas e negativo fora (≈ − R$ 206 a 8% e ≈ − R$ 480 a 25%).</p><p>{{B}} erra: o VPL sobe até cerca de 15% e depois cai a zero em 20%. {{C}} usa uma média sem significado econômico. {{D}} erra: o VPL sempre pode ser calculado. {{A}} ignora a segunda raiz.</p>`,
+ efig:()=>{const fl=[-100,230,-132],pts=[];for(let i=0;i<=30;i++)pts.push([i,npv(fl,i/100)]);
+  return fig(line({series:[{pts,k:'l1'}],x:[0,30],y:[-3,1],xt:[0,5,10,15,20,25,30],yt:[-3,-2,-1,0,1],dec:0,xl:'taxa de desconto (% a.a.)',yl:'VPL (R$ mil)',marks:[{x:10,y:0,l:'10%',dy:16,dx:-4,a:'end'},{x:20,y:0,l:'20%',dy:16},{x:12,y:npv(fl,.12),l:'TMA 12%: VPL ≈ +0,13',dy:-12,dx:-6,a:'end'}],label:'Perfil do VPL com duas raízes, 10% e 20%'}),'Perfil do VPL: positivo só entre 10% e 20%, com pico próximo de 15%.')}},
+{s:S4,tp:'Payback',ans:'B',
+ h:`<p>O payback descontado é o primeiro instante em que a soma de FC_t/(1+TMA)^t iguala o investimento inicial I_0, enquanto o payback simples soma os FC_t sem desconto. A TIR é a taxa que satisfaz Σ FC_t/(1+TIR)^t − I_0 = 0. TMA é a Taxa Mínima de Atratividade.</p><p><b>Asserção:</b> em projetos industriais de média e longa duração, o payback descontado é preferível ao simples como medida de liquidez, <b>PORQUE</b> a TIR pressupõe que os fluxos intermediários sejam reinvestidos à própria TIR.</p><p><b>Assinale a alternativa correta.</b></p>`,
+ o:AR,
+ fig:()=>{const fl=[-100,40,40,40,40,40],a=[],b=[];let s=0,d=0;fl.forEach((f,t)=>{s+=f;d+=f/Math.pow(1.12,t);a.push([t,s]);b.push([t,d])});
+  return fig(line({series:[{pts:a,k:'l2',name:'acumulado simples',dots:1},{pts:b,k:'l1',name:'acumulado descontado (12%)',dots:1}],x:[0,5],y:[-110,110],xt:[0,1,2,3,4,5],yt:[-100,-50,0,50,100],xl:'ano',yl:'R$ mil',label:'Fluxo acumulado simples e descontado'}),'Ilustração: mesmo projeto (−100, depois +40 por 5 anos) com payback simples e descontado.')},
+ e:`<p>As duas são verdadeiras, mas a razão não justifica: a premissa de reinvestimento da TIR é uma limitação da TIR, sem relação com a escolha entre payback simples e descontado.</p>`},
+{s:S5,tp:'Integração',ans:'D',
+ h:`<p>Seja VPL = Σ FC_t/(1+TMA)^t − I_0, IL = 1 + VPL/I_0 (Índice de Lucratividade), TIR a taxa que anula o VPL e TIRM a TIR Modificada, que reinveste os fluxos intermediários a uma taxa externa. Relacione cada situação de decisão (Coluna I) ao critério mais adequado (Coluna II).</p><p><b>Coluna I:</b></p><ul class="col2"><li><b>(1)</b> Duas alternativas mutuamente exclusivas, de portes muito diferentes, sem restrição de capital.</li><li><b>(2)</b> Orçamento limitado a repartir entre várias propostas independentes.</li><li><b>(3)</b> A diretoria exige que o capital imobilizado seja reposto, já considerado o custo do dinheiro no tempo, antes do fim do contrato de manutenção.</li><li><b>(4)</b> Fluxo com desembolso de desativação ao final da vida útil, que provoca mais de uma inversão de sinal.</li></ul><p><b>Coluna II:</b></p><ul class="col2"><li><b>(a)</b> Payback descontado, como filtro de liquidez.</li><li><b>(b)</b> IL como primeiro ranqueamento, conferindo depois o VPL da carteira.</li><li><b>(c)</b> Maior VPL.</li><li><b>(d)</b> VPL (ou TIRM) no lugar da TIR convencional.</li><li><b>(e)</b> Maior TIR.</li></ul><p><b>A associação correta é:</b></p>`,
+ o:['1-e, 2-b, 3-a, 4-d.','1-c, 2-b, 3-d, 4-a.','1-c, 2-e, 3-a, 4-d.','1-c, 2-b, 3-a, 4-d.','1-b, 2-c, 3-a, 4-d.'],
+ e:`<p>1-c (maior VPL, pois a TIR ignora a escala), 2-b (IL como primeiro ranking e conferência do VPL da carteira), 3-a (payback descontado como filtro de liquidez), 4-d (VPL ou TIRM, pois a TIR pode ser múltipla). A alternativa (e), maior TIR, é o distrator.</p>`},
+{s:S3,tp:'TMA e risco',ans:'A',
+ h:`<p>Considere VPL = Σ FC_t/(1+TMA)^t − I_0, em que TMA é a Taxa Mínima de Atratividade, FC_t é o fluxo de caixa no período t e I_0 é o investimento inicial, e a TIR como a taxa que anula o VPL. Julgue as afirmativas sobre projetos convencionais (uma única inversão de sinal).</p>
+ <ol class="rom"><li>Elevar a TMA reduz o VPL de um projeto e pode inverter a decisão de aceitá-lo.</li><li>A TMA deve ser a mesma para todos os projetos da empresa, pois reflete exclusivamente o custo de capital.</li><li>O cálculo do VPL supõe, implicitamente, que os fluxos intermediários sejam reinvestidos à própria TMA, premissa mais conservadora que a da TIR.</li><li>Se a TIR é igual à TMA, o VPL é positivo e o projeto é viável.</li></ol><p><b>Estão corretas:</b></p>`,
+ o:['I e III apenas.','I, II e III apenas.','II e IV apenas.','I, III e IV apenas.','III apenas.'],
+ e:`<p>I é verdadeira: em projetos convencionais o VPL decresce com a TMA. II é falsa: o prêmio de risco varia por projeto. III é verdadeira: o VPL reinveste à TMA, mais conservador que reinvestir à TIR. IV é falsa: com TIR = TMA, o VPL é zero e o projeto é indiferente.</p>`,
+ efig:()=>curveFig([-100,40,40,40,40],'VPL em função da taxa de desconto','VPL × taxa de desconto: quanto maior a TMA, menor o VPL; na TIR ele se anula.',[{x:10,y:npv([-100,40,40,40,40],.1),l:'TMA 10%: VPL ≈ +'+f1(npv([-100,40,40,40,40],.1),0),dx:10,dy:-8},{x:25,y:npv([-100,40,40,40,40],.25),l:'TMA 25%: VPL ≈ '+f1(npv([-100,40,40,40,40],.25),0),dx:10,dy:16}])}
+];
+
+</script>
+
+<script>
+/* motor.js — lógica do simulado (cronômetro, correção, classificação, devolutiva, e-mail). Normalmente você NÃO precisa editar. */
+'use strict';
+/* ====== estado ====== */
+const N=Q.length, LIMIT=CONFIG.limiteSegundos||360, TOPICS=CONFIG.temas||[...new Set(Q.map(q=>q.tp))];
+const LIMTXT=mmss(LIMIT), LIMLBL=LIMTXT.replace(/^0/,'');
+
+/* ====== configuração visual / textos (lê CONFIG de questoes.js) ====== */
+function applyConfig(){
+  document.title='Simulado · '+CONFIG.titulo;
+  $('topName').textContent=CONFIG.instituicao+(CONFIG.curso?' · '+CONFIG.curso:'');
+  $('tTitle').textContent=CONFIG.titulo;
+  $('tLead').textContent=CONFIG.descricao||'';
+  const n=N+' questões';
+  $('tRules').innerHTML=[
+    'São '+n+', com '+LIMLBL.replace(':',' min ').replace(/ min 00$/,' min')+' por questão. É possível pular, pausando o tempo individual, e retornar depois. Quando o tempo acaba, a questão é encerrada com a alternativa marcada ou em branco.',
+    'Ao final, o sistema mostra as questões pendentes e exige responder todas as que ainda tenham tempo disponível. Questões com tempo esgotado podem ficar em branco.',
+    'A devolutiva, com gabarito, resolução e gráficos, aparece só ao final.',
+    'Classificação local de treinamento: maior nota. Desempate pelo menor tempo médio por questão acertada e, depois, pelo menor tempo total (questão não respondida conta '+LIMLBL+').',
+    'Você pode refazer: na classificação vale a sua melhor tentativa (maior nota; empate pelo menor tempo). Uma tentativa pior não tira você da posição.'
+  ].map(t=>'<li>'+esc(t)+'</li>').join('');
+  const sg=CONFIG.siglas||[], fm=CONFIG.formulas||[];
+  if(sg.length||fm.length){
+    $('tSig').innerHTML=(sg.length?'<table class="sig"><tbody>'+sg.map(r=>'<tr><td>'+fmt(esc(r[0]))+'</td><td>'+fmt(esc(r[1]))+'</td></tr>').join('')+'</tbody></table>':'')+(fm.length?'<div class="fm">'+fm.map(f=>fmt(esc(f))).join('<br>')+'</div>':'');
+  }else $('tSigBox').hidden=true;
+  $('clock').textContent=LIMTXT;
+  document.documentElement.style.setProperty('--n',N);
+}
+applyConfig();
+
+let QS=Q; // questões na ordem/alternativas da tentativa atual (embaralhadas)
+let st={name:'',email:'',idx:0,ans:[],time:[],deadline:0,qStart:0,sel:null,timer:null,done:false,res:null};
+let db=null,uid=null,rows=null,rankErr=null,rankTimer=null,savedNow=false,already=false;
+
+/* ====== classificação ====== */
+/* Vale a melhor tentativa: maior nota; empate -> menor tempo por acerto; depois menor tempo total. */
+const avgDe=r=>r.score?r.tc/r.score:Infinity;
+function melhorQue(a,b){if(a.score!==b.score)return a.score>b.score;const x=avgDe(a),y=avgDe(b);if(x!==y)return x<y;return a.tt<b.tt}
+const rankSort=a=>a.slice().sort((x,y)=>y.score-x.score||x.avg-y.avg||x.tt-y.tt);
+function normRows(snap){return snap.docs.filter(d=>d.exists).map(d=>{const v=d.data()||{};const score=Math.max(0,Math.min(N,+v.score||0)),tc=Math.max(0,+v.tc||0),tt=Math.max(0,+v.tt||0);
+  return{id:d.id,name:String(v.name||'Participante').slice(0,40),score,avg:score?tc/score:Infinity,tt}})}
+function rankHtml(limit){
+  if(rankErr)return `<p class="note">${esc(rankErr)}</p>`;
+  if(rows===null)return `<p class="note">Carregando classificação…</p>`;
+  if(!rows.length)return `<p class="note">Ainda não há resultados registrados.</p>`;
+  const r=rankSort(rows);const view=limit?r.slice(0,limit):r;
+  let h=`<p style="margin:0 0 8px"><b>1º lugar:</b> ${esc(r[0].name)} · ${r[0].score}/${N} · tempo por acerto ${r[0].score?mmss(r[0].avg):'—'} · tempo total ${mmss(r[0].tt)}</p><div class="scroll"><table class="rk"><thead><tr><th>#</th><th>Participante</th><th>Nota</th><th>Tempo/acerto</th><th>Tempo total</th></tr></thead><tbody>`;
+  view.forEach((p,i)=>{h+=`<tr class="${p.id===uid?'me':''}"><td class="n">${i+1}</td><td>${esc(p.name)}${p.id===uid?' (você)':''}</td><td class="m">${p.score}/${N}</td><td class="m">${p.score?mmss(p.avg):'—'}</td><td class="m">${mmss(p.tt)}</td></tr>`});
+  h+='</tbody></table></div>';
+  if(limit&&r.length>limit)h+=`<p class="note">Mostrando os ${limit} primeiros de ${r.length}.</p>`;
+  return h}
+let lastUp=null;
+const hhmm=d=>d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+async function refreshRank(btn){
+  if(!db){rankErr=rankErr||'Classificação indisponível neste acesso.';renderRank();return}
+  btn.disabled=true;
+  try{const snap=await db.collection('ranking').get();rows=normRows(snap);rankErr=null;lastUp=new Date()}
+  catch(e){rankErr='Não foi possível atualizar a classificação ('+(e&&e.code||'erro')+').'}
+  finally{btn.disabled=false;renderRank()}}
+function renderRank(){
+  document.querySelectorAll('[data-upd]').forEach(p=>p.textContent=lastUp?'Atualizado às '+hhmm(lastUp)+'. Também se atualiza sozinha quando alguém conclui.':'Atualiza sozinha quando alguém conclui; use o botão para forçar.');
+  $('rankIntro').innerHTML=rankHtml(10);
+  if(!$('vRes').hidden)$('rankRes').innerHTML=rankHtml(0);
+  already=!!(uid&&rows&&rows.some(x=>x.id===uid));
+  $('introNote').textContent=already?'Seu melhor resultado neste navegador já está registrado; refazer só o substitui se for melhor.':'';}
+async function boot(){
+  rankTimer=setTimeout(()=>{if(rows===null){rankErr='A classificação não pôde ser carregada neste acesso. O simulado funciona normalmente.';renderRank()}},10000);
+  try{
+    if(!window.claude||!window.claude.use)throw 0;
+    const user=await window.claude.use('user');if(user&&user.id){uid=await user.id()}
+    db=await window.claude.use('db');
+    if(!db||!uid){rankErr='Classificação indisponível: abra o simulado conectado à sua conta Claude e com permissão de colaborador.';clearTimeout(rankTimer);renderRank();return}
+    db.collection('ranking').onSnapshot(snap=>{clearTimeout(rankTimer);rankErr=null;rows=normRows(snap);lastUp=new Date();renderRank()},e=>{clearTimeout(rankTimer);rankErr='Não foi possível ler a classificação ('+(e&&e.code||'erro')+').';renderRank()});
+  }catch(e){clearTimeout(rankTimer);rankErr='Classificação indisponível neste acesso. O simulado funciona normalmente.';renderRank()}}
+
+/* ====== fluxo do simulado ====== */
+function show(v){document.body.classList.toggle('printing',v==='vPrint');['vIntro','vQuiz','vRes','vPrint'].forEach(i=>$(i).hidden=i!==v);window.scrollTo(0,0)}
+$('inName').addEventListener('input',()=>{$('btnStart').disabled=!$('inName').value.trim()});
+$('btnStart').addEventListener('click',()=>{
+  const seed=(Math.random()*4294967296)>>>0;
+  const tent=montarTentativa(Q,seed,CONFIG.embaralhar,typeof AR!=='undefined'?AR:null);QS=tent.qs;
+  st={seed,date:new Date().toLocaleDateString('pt-BR'),name:$('inName').value.trim().slice(0,40),email:$('inMail').value.trim(),idx:0,
+    ans:Array(N).fill(null),draft:Array(N).fill(null),time:Array(N).fill(0),visited:Array(N).fill(false),resolved:Array(N).fill(false),
+    deadline:0,qStart:0,sel:null,timer:null,done:false,reviewing:false,busy:false,res:null};
+  savedNow=false;show('vQuiz');openQ(0);
+});
+/* Cada questão tem saldo independente. Pular congela o saldo; não renova 6 minutos. */
+function remaining(i){return Math.max(0,LIMIT-st.time[i])}
+function pending(){return QS.map((_,i)=>i).filter(i=>!st.resolved[i]&&remaining(i)>0)}
+function firstUnvisited(){return QS.findIndex((_,i)=>!st.visited[i]&&!st.resolved[i])}
+function pauseCurrent(){
+  if(st.reviewing||st.done)return;
+  clearInterval(st.timer);st.timer=null;
+  const i=st.idx;
+  const elapsed=Math.max(0,(Date.now()-st.qStart)/1000);
+  st.time[i]=Math.min(LIMIT,st.time[i]+elapsed);
+  st.draft[i]=st.sel;
+}
+function drawProgress(){
+  $('segs').innerHTML=QS.map((_,i)=>'<i title="Questão '+(i+1)+'" class="'+(st.resolved[i]?(st.ans[i]===null?'e':'d'):i===st.idx&&!st.reviewing?'c':st.visited[i]?'p':'')+'"></i>').join('');
+}
+function openQ(i){
+  clearInterval(st.timer);st.timer=null;st.reviewing=false;st.busy=false;
+  if(st.resolved[i]){review();return}
+  st.idx=i;st.sel=st.draft[i];st.visited[i]=true;
+  const q=QS[i];
+  st.qStart=Date.now();st.deadline=st.qStart+remaining(i)*1000;
+  $('topinfo').textContent='Questão '+(i+1)+' de '+N;
+  drawProgress();
+  let h=`<div class="qh"><span class="qn">Questão ${String(i+1).padStart(2,'0')}</span><span class="pill">${esc(q.s)}</span><span class="pill">${esc(q.tp)}</span></div><p class="note"><b>${pending().length} questão(ões) ainda sem confirmação.</b> Você pode pular e retornar; o tempo restante desta questão será preservado.</p><div class="enun">${fmt(q.h)}</div>${q.fig?q.fig():''}<div class="opts" role="radiogroup" aria-label="Alternativas">`;
+  q.o.forEach((t,k)=>{const L=LET[k];h+=`<button type="button" class="opt" role="radio" aria-checked="${st.sel===L}" data-k="${L}"><span class="k">${L}</span><span>${fmt(esc(t))}</span></button>`});
+  h+=`</div><div class="foot"><span class="note">A–E selecionam. Confirmar registra a resposta; Pular guarda o tempo.</span><div><button class="btn" id="btnNext" type="button">Confirmar resposta</button> <button class="btn ghost" id="btnSkip" type="button">Pular e pausar esta questão</button> <button class="btn ghost" id="btnSummary" type="button">Ver pendências</button></div></div>`;
+  $('qcard').innerHTML=h;updNext();tick();st.timer=setInterval(tick,200);
+  $('qcard').querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>pick(b.dataset.k)));
+  $('btnNext').addEventListener('click',()=>endQ(false));
+  $('btnSkip').addEventListener('click',()=>skipQ());
+  $('btnSummary').addEventListener('click',()=>{pauseCurrent();if(st.time[st.idx]>=LIMIT)expirePaused();review()});
+  window.scrollTo(0,0);
+}
+function pick(k){if(st.busy||st.done)return;st.sel=k;$('qcard').querySelectorAll('.opt').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.k===k)));updNext()}
+function updNext(){const b=$('btnNext');if(b)b.disabled=!st.sel}
+function tick(){
+  if(st.busy||st.reviewing||st.done)return;
+  const left=Math.max(0,st.deadline-Date.now())/1000;
+  $('clock').textContent=mmss(Math.ceil(left));$('tfill').style.transform='scaleX('+(left/LIMIT)+')';
+  const tm=$('tm');tm.classList.toggle('crit',left<=30);tm.classList.toggle('warn',left>30&&left<=60);
+  $('tmsg').textContent=left<=0?'Tempo esgotado':left<=30?'Menos de 30 segundos':left<=60?'Menos de 1 minuto':'';
+  if(left<=0)endQ(true);
+}
+function expirePaused(){
+  const i=st.idx; if(st.resolved[i]||st.time[i]<LIMIT)return;
+  st.resolved[i]=true;st.ans[i]=st.draft[i];st.time[i]=LIMIT;
+}
+function nextOrReview(){const k=firstUnvisited();if(k>=0)openQ(k);else review()}
+function skipQ(){
+  if(st.busy||st.done)return;st.busy=true;
+  pauseCurrent();expirePaused();nextOrReview();
+}
+function endQ(timeout){
+  if(st.busy||st.done||st.reviewing)return;
+  if(!timeout&&!st.sel)return;
+  st.busy=true;
+  pauseCurrent();
+  const i=st.idx;
+  if(timeout)st.time[i]=LIMIT;
+  st.ans[i]=st.sel;st.resolved[i]=true;st.draft[i]=st.sel;
+  nextOrReview();
+}
+function review(){
+  clearInterval(st.timer);st.timer=null;st.reviewing=true;st.busy=false;
+  $('topinfo').textContent='Revisão final';
+  $('clock').textContent='PAUSA';$('tfill').style.transform='scaleX(0)';$('tmsg').textContent='Cronômetros pausados';
+  drawProgress();
+  const todo=pending(),answered=st.resolved.filter((v,i)=>v&&st.ans[i]!=null).length;
+  const expired=st.resolved.filter((v,i)=>v&&st.ans[i]==null).length;
+  let h=`<h2>Revisão das respostas</h2><p>Respondidas: <b>${answered}</b> de ${N}. Sem resposta: <b>${todo.length+expired}</b> (${todo.length} com tempo disponível; ${expired} com tempo esgotado).</p>`;
+  if(todo.length){
+    h+=`<p class="note">Antes de concluir, responda as <b>${todo.length}</b> questões que ainda têm tempo. O cronômetro individual fica pausado nesta tela.</p><div class="chips">`;
+    todo.forEach(i=>{h+=`<button class="chip bl" type="button" data-go="${i}">Questão ${i+1} · ${mmss(remaining(i))} restante(s)</button>`});
+    h+=`</div><p class="note">Escolha uma das questões acima para retornar.</p><button class="btn" type="button" id="btnFinish" disabled>Concluir (existem pendências)</button>`;
+  }else{
+    h+=`<p class="note">Todas as questões foram respondidas ou tiveram seu tempo esgotado. Confira o resumo e conclua o simulado.</p><button class="btn" type="button" id="btnFinish">Concluir simulado e gerar devolutiva</button>`;
+  }
+  $('qcard').innerHTML=h;
+  $('qcard').querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>openQ(Number(b.dataset.go))));
+  const b=$('btnFinish');if(b&&!b.disabled)b.onclick=()=>{if(pending().length)return review();if(confirm('Concluir e gerar sua devolutiva? Não será possível alterar as respostas.'))finish()};
+  window.scrollTo(0,0);
+}
+document.addEventListener('keydown',e=>{
+  if($('vQuiz').hidden||st.reviewing||st.done||!st.timer)return;
+  const k=e.key.toUpperCase();
+  if(LET.includes(k)&&!e.ctrlKey&&!e.metaKey&&document.activeElement.tagName!=='INPUT')pick(k);
+  else if(e.key==='Enter'&&document.activeElement.tagName!=='BUTTON'&&st.sel)endQ(false);
+});
+
+/* ====== resultado ====== */
+function stat(i){const a=st.ans[i];return a==null?'bl':a===QS[i].ans?'ok':'no'}
+const STX={ok:'Correta',no:'Incorreta',bl:'Em branco'};
+async function finish(){
+  st.done=true;
+  const score=QS.filter((_,i)=>stat(i)==='ok').length,tt=st.time.reduce((a,b)=>a+b,0),tc=st.time.reduce((a,t,i)=>a+(stat(i)==='ok'?t:0),0);
+  st.res={score,tt,tc,avg:score?tc/score:null};
+  show('vRes');renderRes();
+  if(db&&uid){
+    try{const ref=db.collection('ranking').doc(uid);const cur=await ref.get();
+      const nw={score,tc:Math.round(tc),tt:Math.round(tt)};
+      if(cur.exists){const o=cur.data()||{},old={score:+o.score||0,tc:+o.tc||0,tt:+o.tt||0};
+        if(melhorQue(nw,old)){await ref.set({name:st.name,...nw,at:Date.now(),v:1,n:(+o.n||1)+1});savedNow=true;$('rankNote').textContent='Novo melhor resultado! Seu resultado local foi atualizado.'}
+        else{$('rankNote').textContent='Esta tentativa não superou seu melhor resultado ('+old.score+'/'+N+'), que continua na classificação.'}}
+      else{await ref.set({name:st.name,...nw,at:Date.now(),v:1,n:1});savedNow=true;$('rankNote').textContent='Seu resultado foi registrado somente neste navegador.'}}
+    catch(e){$('rankNote').textContent='Não foi possível registrar seu resultado na classificação'+(e&&e.code==='invalid_argument'?' (é preciso ter permissão de colaborador neste simulado).':'.')}
+  }else{$('rankNote').textContent='Seu resultado não foi registrado na classificação porque ela está indisponível neste acesso.'}
+  renderRank()}
+function codigoAtual(){return codificaTentativa({seed:st.seed,sig:assinaturaQ(Q,CONFIG.embaralhar),nome:st.name,data:st.date,resp:st.ans,tempos:st.time})}
+function renderRes(){
+  const r=st.res,pct=Math.round(r.score/N*100);
+  $('topinfo').textContent='Resultado';
+  $('resHead').innerHTML=`<p class="note">${esc(st.name)}</p><div class="score"><div class="big">${r.score}<small>/${N}</small></div><div class="kv"><b>${pct}%</b><span>de aproveitamento</span></div><div class="kv"><b>${r.avg==null?'—':mmss(r.avg)}</b><span>tempo médio por acerto</span></div><div class="kv"><b>${mmss(r.tt)}</b><span>tempo total</span></div></div>`;
+  $('topicBars').innerHTML=TOPICS.map(t=>{const idx=QS.map((q,i)=>q.tp===t?i:-1).filter(i=>i>=0),ok=idx.filter(i=>stat(i)==='ok').length;
+    return `<div class="bar"><span>${esc(t)}</span><span class="tr"><i style="width:${idx.length?ok/idx.length*100:0}%"></i></span><b>${ok}/${idx.length}</b></div>`}).join('');
+  $('timeChart').innerHTML=fig(bars({items:QS.map((_,i)=>({l:String(i+1),v:st.time[i],k:{ok:'pos',no:'neg',bl:'amb'}[stat(i)],t:''})),max:LIMIT,unit:'segundos por questão',ref:[{v:LIMIT,l:'limite '+LIMLBL}],h:230,label:'Tempo gasto em cada questão'}),'Verde: correta. Vermelho: incorreta. Âmbar: em branco. A lista abaixo traz o status em texto.');
+  $('chips').innerHTML=QS.map((_,i)=>{const s=stat(i);return `<a class="chip ${s}" href="#fb${i+1}" data-i="${i}" title="${STX[s]}">${i+1} ${s==='ok'?'✓':s==='no'?'✗':'–'}</a>`}).join('');
+  $('chips').querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();if($('flt').dataset.f&&$('flt').dataset.f!=='all')setFilter('all');const t=$('fb'+(+a.dataset.i+1));t&&t.scrollIntoView({behavior:'smooth',block:'start'})}));
+  $('mailTo').value=st.email;$('codeArea').value=codigoAtual();
+  $('txtArea').value=reportText();
+  $('rankRes').innerHTML=rankHtml(0);
+  $('fbList').innerHTML=QS.map((q,i)=>fbHtml(q,i)).join('');setFilter('all')}
+function fbHtml(q,i){
+  const s=stat(i),a=st.ans[i];
+  let opts='';q.o.forEach((t,j)=>{const L=LET[j],right=L===q.ans,mine=L===a;opts+=`<div class="opt static ${right?'right':mine?'wrong':''}"><span class="k">${L}</span><span>${fmt(esc(t))}</span><span class="tag">${right?'GABARITO':''}${mine&&!right?'SUA RESPOSTA':''}${mine&&right?' · SUA RESPOSTA':''}</span></div>`});
+  return `<article class="card fb" id="fb${i+1}" data-s="${s}"><div class="qh"><span class="qn">Questão ${String(i+1).padStart(2,'0')}</span><span class="pill ${s}">${STX[s]}</span><span class="pill">${esc(q.tp)}</span><span class="pill">${mmss(st.time[i])} de ${LIMTXT}</span></div>
+  <div class="ans"><span>Sua resposta: ${a||'em branco'}</span><span>Gabarito: ${q.ans}</span></div>
+  <div class="exp"><h3>Resolução comentada</h3>${fmt(q.e)}</div>${q.efig?q.efig():''}
+  <details><summary>Ver enunciado e alternativas</summary><div class="enun" style="margin-top:10px">${fmt(q.h)}</div>${q.fig?q.fig():''}<div class="opts" style="margin-top:10px">${opts}</div></details></article>`}
+function setFilter(f){$('flt').dataset.f=f;$('flt').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===f)));document.querySelectorAll('#fbList .fb').forEach(a=>a.hidden=!(f==='all'||a.dataset.s===f))}
+$('flt').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setFilter(b.dataset.f)});
+$('btnAgain').addEventListener('click',()=>{show('vIntro');$('topinfo').textContent='Simulado'});
+
+/* ====== e-mail ====== */
+function reportText(){
+  const r=st.res,L=[];
+  L.push('DEVOLUTIVA DO SIMULADO: '+CONFIG.titulo.toUpperCase(),CONFIG.instituicao+(CONFIG.curso?' · '+CONFIG.curso:''),'');
+  L.push('Participante: '+st.name,'Nota: '+r.score+' de '+N+' ('+Math.round(r.score/N*100)+'%)','Tempo total: '+mmss(r.tt),'Tempo médio por acerto: '+(r.avg==null?'—':mmss(r.avg)),'');
+  if(rows&&uid){const rk=rankSort(rows),p=rk.findIndex(x=>x.id===uid);if(p>=0)L.push('Posição na classificação: '+(p+1)+'º de '+rk.length,'')}
+  L.push('RESULTADO POR QUESTÃO');
+  QS.forEach((q,i)=>L.push(`Q${i+1} (${q.tp}): ${STX[stat(i)]} · sua resposta ${st.ans[i]||'em branco'} · gabarito ${q.ans} · tempo ${mmss(st.time[i])}`));
+  L.push('','RESOLUÇÃO COMENTADA');
+  QS.forEach((q,i)=>L.push(`Questão ${i+1} (gabarito ${q.ans}): ${plain(q.e).replace(/\n+/g,' ').trim()}`,''));
+  L.push('CÓDIGO DA TENTATIVA (guarde: com ele o professor ou você gera o PDF desta devolutiva):',codigoAtual());
+  return L.join('\n')}
+const showMsg=(t,k)=>{const m=$('mailMsg');m.hidden=false;m.className='msg '+(k||'');m.textContent=t};
+$('btnCopy').addEventListener('click',async()=>{const ta=$('txtArea');$('txtBox').open=true;
+  try{await navigator.clipboard.writeText(ta.value);showMsg('Texto copiado. Cole no seu e-mail.','ok')}catch(e){ta.focus();ta.select();showMsg('Não foi possível copiar automaticamente. O texto está selecionado: use Ctrl+C.','er')}});
+$('btnMail').addEventListener('click',async()=>{
+  $('txtBox').open=true;showMsg('Versão de treinamento GitHub Pages: envio automático indisponível. Use o botão Copiar texto da devolutiva e envie pelo seu e-mail.','er');return;
+  const to=$('mailTo').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){showMsg('Digite um e-mail válido para enviar.','er');return}
+  const btn=$('btnMail');btn.disabled=true;showMsg('Enviando…');
+  try{
+    const mcp=window.claude&&window.claude.use?await window.claude.use('mcp'):null;
+    if(!mcp)throw{code:'unavailable'};
+    await mcp.callTool('Gmail','send_message',{to:[to],subject:'Devolutiva do simulado: '+CONFIG.titulo,body:reportText()});
+    showMsg('Devolutiva enviada para '+to+'.','ok')
+  }catch(e){
+    const c=e&&e.code,why={needs_reauth:'Reconecte o Gmail em Configurações > Conectores do Claude.',server_not_connected:'Conecte o Gmail em Configurações > Conectores do Claude.',selection_required:'Escolha qual conexão Gmail usar quando o Claude pedir.',approval_required:'O envio precisa da sua aprovação; clique em Enviar de novo e permita quando o Claude perguntar.',not_in_manifest:'O envio por Gmail não foi permitido para este simulado.',blocked_by_policy:'Sua organização bloqueou o envio por Gmail.',unavailable:'O envio por e-mail só funciona com o simulado aberto no Claude.',not_granted:'O envio por e-mail só funciona com o simulado aberto no Claude.',capability_disabled:'O envio por e-mail só funciona com o simulado aberto no Claude.',tool_error:'O Gmail recusou a mensagem.'}[c]||'Não foi possível enviar agora.';
+    showMsg('E-mail não enviado. '+why+' Use "Copiar texto da devolutiva" para mandar manualmente.','er');$('txtBox').open=true
+  }finally{btn.disabled=false}});
+
+document.querySelectorAll('[data-refresh]').forEach(b=>b.addEventListener('click',()=>refreshRank(b)));
+
+/* ====== PDF da devolutiva (visão de impressão) e leitura por código ====== */
+const sitDe=(q,a)=>a==null?'bl':a===q.ans?'ok':'no';
+function montaPrint(att){
+  const {qs,resp,tempos}=att,n=qs.length,sit=qs.map((q,i)=>sitDe(q,resp[i]));
+  const score=sit.filter(s=>s==='ok').length,tt=tempos.reduce((a,b)=>a+b,0),tc=tempos.reduce((a,t,i)=>a+(sit[i]==='ok'?t:0),0),avg=score?tc/score:null;
+  const hd=CONFIG.instituicao+(CONFIG.curso?' · '+CONFIG.curso:'');
+  let h=`<header class="pv-head"><div class="pv-inst">${esc(hd)}</div><h1>Devolutiva do simulado</h1><div class="pv-sub">${esc(CONFIG.titulo)}</div></header>`;
+  h+=`<table class="pv-t pv-id"><tbody><tr><th>Estudante</th><td>${esc(att.nome||'')}</td><th>Data</th><td>${esc(att.data||'')}</td></tr><tr><th>Nota</th><td><b>${score} de ${n}</b> (${Math.round(score/n*100)}%)</td><th>Tempo total</th><td>${mmss(tt)}${avg==null?'':' · '+mmss(avg)+' por acerto'}</td></tr></tbody></table>`;
+  if(att.aviso)h+=`<p class="pv-warn">${esc(att.aviso)}</p>`;
+  h+=`<h2>Resumo e gabarito</h2><table class="pv-t"><thead><tr><th>Questão</th><th>Tema</th><th>Estilo</th><th>Gabarito</th><th>Resposta</th><th>Situação</th><th>Tempo</th></tr></thead><tbody>`;
+  qs.forEach((q,i)=>{h+=`<tr class="${sit[i]}"><td>${i+1}</td><td>${esc(q.tp)}</td><td>${esc(q.s)}</td><td class="c"><b>${q.ans}</b></td><td class="c">${resp[i]||'—'}</td><td>${STX[sit[i]]}</td><td class="c">${mmss(tempos[i])}</td></tr>`});
+  h+=`</tbody></table>`;
+  if(TOPICS.length>1){h+=`<h2>Desempenho por tema</h2><table class="pv-t"><thead><tr><th>Tema</th><th>Acertos</th><th>Aproveitamento</th></tr></thead><tbody>`;
+    TOPICS.forEach(t=>{const ix=qs.map((q,i)=>q.tp===t?i:-1).filter(i=>i>=0),ok=ix.filter(i=>sit[i]==='ok').length;if(ix.length)h+=`<tr><td>${esc(t)}</td><td class="c">${ok} de ${ix.length}</td><td class="c"><b>${Math.round(ok/ix.length*100)}%</b></td></tr>`});
+    h+=`</tbody></table>`}
+  const sg=CONFIG.siglas||[],fm=CONFIG.formulas||[];
+  if(sg.length||fm.length){h+=`<h2>Siglas e fórmulas de referência</h2>`;
+    if(sg.length)h+=`<table class="pv-t"><tbody>`+sg.map(r=>`<tr><th>${fmt(esc(r[0]))}</th><td>${fmt(esc(r[1]))}</td></tr>`).join('')+`</tbody></table>`;
+    if(fm.length)h+=`<div class="pv-fm">`+fm.map(f=>fmt(esc(f))).join('<br>')+`</div>`}
+  h+=`<h2 class="pv-break">Resolução comentada</h2>`;
+  qs.forEach((q,i)=>{
+    const s=sit[i],a=resp[i];
+    let o='';q.o.forEach((t,j)=>{const L=LET[j],right=L===q.ans,mine=L===a;o+=`<div class="pv-o ${right?'right':mine?'wrong':''}"><span class="k">${L}</span><span>${fmt(esc(t))}</span><span class="tag">${right?'GABARITO':''}${mine&&!right?'RESPOSTA DO ESTUDANTE':''}${mine&&right?' · RESPOSTA DO ESTUDANTE':''}</span></div>`});
+    h+=`<article class="pq"><div class="pq-h"><span class="qn">Questão ${String(i+1).padStart(2,'0')}</span><span class="pill ${s}">${STX[s]}</span><span class="pill">${esc(q.tp)}</span><span class="pill">${esc(q.s)}</span><span class="pill">${mmss(tempos[i])} de ${LIMTXT}</span></div>
+    <div class="enun">${fmt(q.h)}</div>${q.fig?q.fig():''}<div class="pv-opts">${o}</div>
+    <p class="pv-ans">Resposta do estudante: <b>${a||'em branco'}</b> · Gabarito: <b>${q.ans}</b></p>
+    <div class="exp"><h3>Resolução</h3>${fmt(q.e)}</div>${q.efig?q.efig():''}</article>`});
+  return h}
+function abrirPrint(att,imprimir){
+  $('pvBody').innerHTML=montaPrint(att);show('vPrint');$('topinfo').textContent='Devolutiva em PDF';
+  $('pvMsg').textContent='';
+  if(imprimir)setTimeout(()=>{try{window.print()}catch(e){}},400)}
+function attAtual(){return{nome:st.name,data:st.date,qs:QS,resp:st.ans,tempos:st.time}}
+function attPorCodigo(cod){
+  const d=decodificaTentativa(cod),t=montarTentativa(Q,d.seed,CONFIG.embaralhar,typeof AR!=='undefined'?AR:null);
+  if(d.resp.length!==Q.length||d.tempos.length!==Q.length)throw new Error('O código é de um simulado com outro número de questões.');
+  const aviso=d.sig!==assinaturaQ(Q,CONFIG.embaralhar)?'Atenção: o conteúdo do simulado (questoes.js) mudou depois desta tentativa; gabarito e ordem podem não corresponder ao que o estudante viu.':'';
+  return{nome:d.nome,data:d.data,qs:t.qs,resp:d.resp,tempos:d.tempos,aviso}}
+let pvBack='vIntro';
+$('btnPdf').addEventListener('click',()=>{pvBack='vRes';abrirPrint(attAtual(),true);$('pvMsg').textContent='Na janela de impressão, escolha "Salvar como PDF". Se ela não abrir, use Ctrl+P (ou o menu do navegador > Imprimir).'});
+$('btnCode').addEventListener('click',()=>{
+  const msg=$('codeMsg');msg.hidden=false;
+  try{pvBack='vIntro';abrirPrint(attPorCodigo($('codeIn').value),false);$('pvMsg').textContent='Clique em "Imprimir / salvar PDF" e escolha "Salvar como PDF".'}
+  catch(e){msg.className='msg er';msg.textContent=e.message||'Código inválido.'}});
+$('btnPrint').addEventListener('click',()=>{try{window.print()}catch(e){}$('pvMsg').textContent='Se a janela de impressão não abriu, use Ctrl+P (ou o menu do navegador > Imprimir) ou o botão "Baixar arquivo para imprimir".'});
+$('btnPvBack').addEventListener('click',()=>{show(pvBack);$('topinfo').textContent=pvBack==='vRes'?'Resultado':'Simulado'});
+$('btnPvHtml').addEventListener('click',()=>{
+  const c=$('vPrint').cloneNode(true);c.querySelectorAll('.noprint').forEach(e=>e.remove());
+  const css=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+  const html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Devolutiva</title><style>'+css+'</style></head><body class="printing"><p class="onlyscreen" style="padding:8px 16px;font:14px sans-serif">Para gerar o PDF: Ctrl+P e escolha "Salvar como PDF".</p><section id="vPrint">'+c.innerHTML+'</section></body></html>';
+  salvarArquivo('devolutiva-'+(String(($('pvBody').querySelector('.pv-id td')||{}).textContent||'aluno').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'aluno')+'.html',html)});
+async function salvarArquivo(nome,html){
+  try{const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;
+    if(dl){try{await dl.save({filename:nome,data:html});$('pvMsg').textContent='Arquivo salvo. Abra-o no navegador, use Ctrl+P e escolha "Salvar como PDF".'}catch(e){if(!(e&&e.code==='declined'))$('pvMsg').textContent='Não foi possível salvar o arquivo aqui.'}return}}catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  $('pvMsg').textContent='Arquivo baixado. Abra-o no navegador, use Ctrl+P e escolha "Salvar como PDF".'}
+$('btnCopyCode').addEventListener('click',async()=>{const ta=$('codeArea');
+  try{await navigator.clipboard.writeText(ta.value);$('codeMsg2').textContent='Código copiado.'}catch(e){ta.focus();ta.select();$('codeMsg2').textContent='Selecione e copie o código acima (Ctrl+C).'}});
+
+document.querySelectorAll('[data-refresh]').forEach(b=>b.addEventListener('click',()=>refreshRank(b)));
+/* Abertura direta pela URL: index.html?codigo=SIM1.xxxx  (usado pelo gerar_pdf.js) */
+let soImprimir=false;
+if(typeof location!=='undefined'){try{const pr=new URLSearchParams(location.search),cd=pr.get('codigo');
+  if(cd){soImprimir=true;pvBack='vIntro';abrirPrint(attPorCodigo(cd),pr.get('imprimir')==='1')}}catch(e){soImprimir=false;console.error(e)}}
+if(!soImprimir)boot();
+
+
+/* GitHub Pages: link de estudantes = URL desta página publicada. */
+function carregarQrAlunos(){
+  const status=document.getElementById('shareStatus'),input=document.getElementById('shareLink');
+  const qr=document.getElementById('shareQr'),copy=document.getElementById('btnShareCopy');
+  const abrir=document.getElementById('shareOpen');
+  const url=new URL(window.location.href);
+  url.search='';url.hash='';
+  input.value=url.href;copy.disabled=false;abrir.href=url.href;abrir.hidden=false;
+  qr.onerror=function(){qr.hidden=true;status.textContent='O QR Code não carregou; o link permanece disponível.'};
+  qr.onload=function(){status.textContent='QR Code pronto: teste no celular.'};
+  qr.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=12&data='+encodeURIComponent(url.href);
+  qr.hidden=false;
+}
+document.getElementById('btnShareReload').addEventListener('click',carregarQrAlunos);
+document.getElementById('btnShareCopy').addEventListener('click',function(){
+  const input=document.getElementById('shareLink'),status=document.getElementById('shareStatus');
+  const fallback=function(){input.focus();input.select();status.textContent='Link selecionado: pressione Ctrl+C.'};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(input.value).then(function(){status.textContent='Link copiado.'},fallback)}else fallback();
+});
+carregarQrAlunos();
+
+document.getElementById('resetDemo').addEventListener('click', function(){
+  if(!confirm('Apagar a classificação de treinamento somente neste navegador?'))return;
+  try{localStorage.removeItem('quiz_viabilidade_github_rank_v1');document.getElementById('resetDemoStatus').textContent='Classificação local apagada. Atualize a página.';}
+  catch(e){document.getElementById('resetDemoStatus').textContent='O navegador bloqueou o armazenamento.'}
+});
+</script>
+
+</body>
+</html>
